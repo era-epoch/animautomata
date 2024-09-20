@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import { clamp, modulo } from "./utils";
 import { Vector2, TimingFunction, DrawStyle, AnimautomatonOps, BezierControlPoints } from "./types";
 
@@ -9,7 +8,9 @@ abstract class Animautomaton {
   // #region Non-configurable properties
 
   /**
-   * A uuid for this object. Generated with v4 from the uuid package.
+   * A uuid for this object. Generated with crypto.randomUUID().
+   * 
+   * Falls back to performance.now() if not running in a secure context.
    */
   id: string;
 
@@ -185,10 +186,12 @@ abstract class Animautomaton {
   // #region Constructor
 
   constructor(canvasId: string, ops?: Partial<AnimautomatonOps>) {
-    if (typeof uuid === "undefined") {
-      throw new Error("uuid is undefined");
+    if (window.isSecureContext) {
+      this.id = crypto.randomUUID();
+    } else {
+      this.id = `${performance.now()}`
     }
-    this.id = uuid();
+    
     this.start = performance.now();
     this.lastDraw = this.start;
     this.lastMutationTimestamp = this.start;

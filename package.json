@@ -21,11 +21,5 @@
     "url": "https://github.com/era-epoch/animautomata/issues",
     "email": "bugs@eracodes.net"
   },
-  "homepage": "https://github.com/era-epoch/animautomata#readme",
-  "dependencies": {
-    "uuid": "^10.0.0"
-  },
-  "devDependencies": {
-    "@types/uuid": "^10.0.0"
-  }
+  "homepage": "https://github.com/era-epoch/animautomata#readme"
 }

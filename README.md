@@ -9,5 +9,5 @@ Animautomata is a library for creating high quality geometric animations on an H
 ## Features
 
 - Fully-typed (source written in Typescript).
-
 - Plug-and-play React components available with `animautomata-react`.
+- Effectively zero-dependency (I think `uuid` shouldn't count :P ...).
