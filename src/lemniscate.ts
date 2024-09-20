@@ -1,17 +1,6 @@
 
-import { Animautomaton, AnimautomatonOps, Vector2 } from "./animautomata";
-
-export type LemniscateOps = AnimautomatonOps & {
-  arcs: number;
-  arcWidth: number;
-  arcWidthDelta: number;
-  tailDelay: number;
-  arcDelay: number;
-  radius: number;
-  radiusDelta: number;
-  xOff: number;
-  mutator: (antiquum: Lemniscate) => void;
-};
+import Animautomaton from "./animautomaton";
+import { LemniscateOps, Vector2 } from "./types";
 
 const DrawOrders = [
   "tail",
@@ -66,7 +55,7 @@ type LemniscateGeometry = {
   checkpoints: number[];
 };
 
-export class Lemniscate extends Animautomaton {
+class Lemniscate extends Animautomaton {
   // #region Non-configurable properties
 
   /**
@@ -114,7 +103,7 @@ export class Lemniscate extends Animautomaton {
    *
    * Can be used to procedurally change the animation properties (e.g. between loops).
    */
-  mutator: (antiquum: Lemniscate) => void;
+  mutator: (lemniscate: Lemniscate) => void;
 
   /**
    * Only has an effect with multiple arcs. Each arc will travel along a path with radius this
@@ -1028,3 +1017,5 @@ export class Lemniscate extends Animautomaton {
     }
   }
 }
+
+export default Lemniscate;

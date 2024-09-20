@@ -1,30 +1,7 @@
-import { AnimautomatonOps, Animautomaton, Vector2 } from "./animautomata";
+import Animautomaton from "./animautomaton";
+import { HexPulse, SempiternalOps, HexPulseStyle, Vector2 } from "./types";
 
-export type SempiternalOps = AnimautomatonOps & {
-  sideLength: number;
-  circleSize: number;
-  relativeExpansion: number;
-  delay: number;
-  alternateSpin: boolean;
-  rotations: number;
-  mutator: (antiquum: Sempiternal) => void;
-  opacityPulse: HexPulse;
-  radiusPulse: HexPulse;
-};
-
-/**
- * A HexPulse is an effect that acts on shapes based on which 'ring' of the hexagonal structure they are in.
- */
-export type HexPulse = {
-  style: HexPulseStyle;
-  delay: number;
-  intensity: number;
-};
-
-export const HEX_PULSE_STYLES = ["disperse", "coelesce", "off"] as const;
-export type HexPulseStyle = (typeof HEX_PULSE_STYLES)[number];
-
-export class Sempiternal extends Animautomaton {
+class Sempiternal extends Animautomaton {
   // #region Configurable properties
 
   /**
@@ -52,7 +29,7 @@ export class Sempiternal extends Animautomaton {
    *
    * Can be used to procedurally change the animation properties (e.g. between loops).
    */
-  mutator: (antiquum: Sempiternal) => void;
+  mutator: (sempiternal: Sempiternal) => void;
 
   /**
    * If true: every other ring will rotate in the opposite direction.
@@ -119,7 +96,7 @@ export class Sempiternal extends Animautomaton {
 
       this.ctxSetColour(i);
 
-      // Pulse effects
+      // Perform pulse effects
       this.performOpacityPulse(i);
       const effectiveRadius = this.performRadiusPulse(i);
 
@@ -223,3 +200,5 @@ export class Sempiternal extends Animautomaton {
     return effectiveRadius;
   }
 }
+
+export default Sempiternal;

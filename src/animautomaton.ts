@@ -1,67 +1,11 @@
 import { v4 as uuid } from "uuid";
 import { clamp, modulo } from "./utils";
-
-// #region Types
-
-export type Vector2 = {
-  x: number;
-  y: number;
-};
-
-export type BezierControlPoints = {
-  cp1: Vector2;
-  cp2: Vector2;
-};
-
-export type AnimautomatonOps = {
-  backgroundColour: string | null;
-  currProgress: number;
-  lastProgress: number;
-  cycleDuration_ms: number;
-  currIteration: number;
-  nIterations: number;
-  fps: number;
-  paused: boolean;
-  colours: string[];
-  opacity: number;
-  opacityDelta: number;
-  timingFunction: TimingFunction;
-  customTimingFunction: (offset?: number) => number;
-  drawStyle: DrawStyle;
-  rest: number;
-  mutationInterval: number;
-};
-
-export const DRAW_STYLES = ["fill", "stroke"] as const;
-export type DrawStyle = (typeof DRAW_STYLES)[number];
-
-export const TIMING_FUNCTIONS = [
-  "linear",
-  "sinusoidal",
-  "quadratic",
-  "cubic",
-  "custom",
-] as const;
-export type TimingFunction = (typeof TIMING_FUNCTIONS)[number];
-
-export const PRESETS = ["antiquum", "lemniscate", "sempiternal"] as const;
-export type Preset = (typeof PRESETS)[number];
-
-export const ANCHORS = ["inner", "centre", "outer"] as const;
-export type Anchor = (typeof ANCHORS)[number];
-
-export const LINECAPS = ["flat", "rounded"] as const;
-export type Linecap = (typeof LINECAPS)[number];
-
-export type Border = {
-  weight: number;
-  colour: string;
-};
+import { Vector2, TimingFunction, DrawStyle, AnimautomatonOps, BezierControlPoints } from "./types";
 
 /**
- * Class containing shared properties and methods for all animautomatons.
+ * Abstract parent class containing shared properties and methods for all animautomatons.
  */
-export abstract class Animautomaton {
+abstract class Animautomaton {
   // #region Non-configurable properties
 
   /**
@@ -94,6 +38,9 @@ export abstract class Animautomaton {
    */
   pauseDuration: number;
 
+  /**
+   * Keeps track of the current colour value during a draw call
+   */
   currColour: string;
 
   // #region Configurable properties
@@ -106,14 +53,14 @@ export abstract class Animautomaton {
   backgroundColour: string | null;
 
   /**
-   * A number between 0 and 1 representing the animation's progress through its loop this frame.
+   * A number between 0 and 1 representing the animation's progress through its loop THIS frame.
    *
    * Default: 0
    */
   currProgress: number;
 
   /**
-   * A number between 0 and 1 representing the animation's progress through its loop last frame.
+   * A number between 0 and 1 representing the animation's progress through its loop LAST frame.
    *
    * Default: 0
    */
@@ -127,7 +74,9 @@ export abstract class Animautomaton {
   lastMutationTimestamp: number;
 
   /**
-   * The canvas element this animation is being drawn on. Animations should have their own canvas with nothing else on it.
+   * The canvas element this animation is being drawn on. 
+   * 
+   * Animations should have their own canvas with nothing else on it.
    */
   canvas: HTMLCanvasElement;
 
@@ -145,9 +94,10 @@ export abstract class Animautomaton {
 
   /**
    * This animation's mutate() method is called after this many iterations.
-   * e.g. If mutationInterval is 0.5, the mutate method will be called halfway through each loop, and again at the end of each loop.
+   * e.g. If mutationInterval is 0.5, the mutate method will be called halfway through each loop, 
+   * and again at the end of each loop.
    *
-   * Default: Infinity (mutate is never called)
+   * Default: Infinity (i.e. mutate() is never called)
    */
   mutationInterval: number;
 
@@ -159,7 +109,9 @@ export abstract class Animautomaton {
   cycleDuration_ms: number;
 
   /**
-   * This animation will be still in its starting position for this percentage of its duration.
+   * A number between 0 and 1.
+   * 
+   * This animation will be still in its starting position for this proportion of its duration.
    *
    * Default: 0
    */
@@ -182,25 +134,27 @@ export abstract class Animautomaton {
   /**
    * This animation will pause after this many loops.
    *
-   * Default: Infinity
+   * Default: Infinity (i.e. animation continues forever)
    */
   nIterations: number;
 
   /**
-   * An array of 6-character hex code colour strings (e.g. ["#ffffff"]).
-   * Must be 6-characters for opacity to work properly.
+   * An array of 7-character hex code colour strings (e.g. ["#ffffff"]).
+   * (Must be 7 characters for opacity to work properly.)
    */
   colours: string[];
 
   /**
-   * Base transparcent to apply to colours when drawing.
+   * A number between 0 and 1.
+   * 
+   * The base transparcency to apply to colours when drawing.
    *
    * Default: 1
    */
   opacity: number;
 
   /**
-   * Each differentiable section will have opacityDelta less opacity than the previous section (minimum 0).
+   * Each differentiable section will have this much less opacity than the previous section (minimum 0).
    *
    * Default: 0
    */
@@ -215,6 +169,9 @@ export abstract class Animautomaton {
 
   /**
    * This function will be called iff timingFunction = "custom"
+   * 
+   * Custom timing functions must take in an offset to apply to currProgress,
+   * and return a value between 0 and 1.
    */
   customTimingFunction: ((offset?: number) => number) | null;
 
@@ -286,9 +243,8 @@ export abstract class Animautomaton {
   /**
    * Parent draw() must be called at the start of childrens' draw() methods.
    */
-
   draw() {
-    // Clears previous render
+    // Clear previous render
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Paint background colour, if present
@@ -371,10 +327,9 @@ export abstract class Animautomaton {
   mutate() {}
 
   /**
-   *
    * @param offset An amount to either add or subtract from the base progress before transformation.
    * @returns A value between 0 and 1 representing the animation's progress through its loop,
-   * transformed according to this.timingFunction
+   * transformed according to this.timingFunction.
    */
   getProgress(offset?: number): number {
     switch (this.timingFunction) {
@@ -449,14 +404,31 @@ export abstract class Animautomaton {
     }
   }
 
+  /**
+   * Moves this.context to position vector v
+   * @param v 
+   */
   ctxMoveToVector(v: Vector2) {
     this.context.moveTo(v.x, v.y);
   }
 
+  /**
+   * Draws a line from the current position of this.context to the position given
+   * by vector v.
+   * @param v 
+   */
   ctxLineToVector(v: Vector2) {
     this.context.lineTo(v.x, v.y);
   }
 
+  /**
+   * Draws a circular bezier curve from the start position to the end position with the center
+   * point of originOffset.
+   * 
+   * @param start 
+   * @param end 
+   * @param originOffset 
+   */
   ctxCircToVector(start: Vector2, end: Vector2, originOffset: Vector2) {
     const cps = this.circularBezierControlPoints(start, end, originOffset);
     this.context.bezierCurveTo(
@@ -485,10 +457,15 @@ export abstract class Animautomaton {
     const colour = `${this.colours[modOffset]}${opacityString}`;
     this.context.strokeStyle = colour;
     this.context.fillStyle = colour;
-    // This is necessary because subseqent access to the colour on the context object does not return opacity, for some reason
+    // This is necessary because subseqent access to the colour on the context object does not 
+    // return opacity in some cases, for some unknown reason. TODO: Investigate
     this.currColour = colour;
   }
 
+  /**
+   * Sets new opacity to: currentOpacity + currentOpacity * modifier. Enforces minimum of 0.
+   * @param modifier
+   */
   ctxModifyOpacity(modifier: number) {
     const styleString = this.currColour;
     const colour = styleString.slice(0, 7);
@@ -549,3 +526,5 @@ export abstract class Animautomaton {
     };
   }
 }
+
+export default Animautomaton;

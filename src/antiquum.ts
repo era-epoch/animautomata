@@ -1,27 +1,8 @@
-import { AnimautomatonOps, Anchor, Border, Linecap, Animautomaton } from "./animautomata";
+import Animautomaton from "./animautomaton";
+import { Anchor, Border, Linecap, AntiquumOps } from "./types";
 import { modulo } from "./utils";
 
-
-export type AntiquumOps = AnimautomatonOps & {
-  arcs: number;
-  arcWidth: number;
-  arcWidthDelta: number;
-  arcAnchor: Anchor;
-  tailDelay: number;
-  arcDelay: number;
-  radius: number;
-  radiusDelta: number;
-  rotations: number;
-  mutator: (antiquum: Antiquum) => void;
-  innerBorder: Border;
-  outerBorder: Border;
-  trackColour: string;
-  lineCap: Linecap;
-  leadCap: Linecap;
-  tailCap: Linecap;
-};
-
-export class Antiquum extends Animautomaton {
+class Antiquum extends Animautomaton {
   // #region Configurable properties
   /**
    * The number of individual shapes to draw.
@@ -117,8 +98,6 @@ export class Antiquum extends Animautomaton {
    */
   tailCap: Linecap | null;
 
-  // #endregion
-
   // #region Constructor
 
   constructor(canvasId: string, ops?: Partial<AntiquumOps>) {
@@ -140,8 +119,6 @@ export class Antiquum extends Animautomaton {
     this.leadCap = ops?.leadCap ?? null;
     this.tailCap = ops?.tailCap ?? null;
   }
-
-  // #endregion
 
   // #region Methods
 
@@ -169,6 +146,7 @@ export class Antiquum extends Animautomaton {
    * Called by this.animate().
    */
   draw() {
+    // TODO: Split behaviour into subfunctions
     super.draw();
     const accumulatedRotation = this.getAccumulatedRotation();
 
@@ -214,7 +192,7 @@ export class Antiquum extends Animautomaton {
       const arcWidthDiff =
         (this.arcs - (i + 1)) * this.arcWidthDelta * this.arcWidth;
 
-      let outerOffset, innerOffset, midOffset;
+      let outerOffset: number, innerOffset: number, midOffset: number;
       if (this.arcAnchor == "centre") {
         outerOffset = radius - arcWidthDiff / 2;
         innerOffset = radius - this.arcWidth + arcWidthDiff / 2;
@@ -596,5 +574,6 @@ export class Antiquum extends Animautomaton {
       this.context.stroke();
     }
   }
-  // #endregion
 }
+
+export default Antiquum;
