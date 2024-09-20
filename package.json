@@ -1,0 +1,31 @@
+{
+  "name": "animautomata",
+  "version": "1.0.0",
+  "description": "a library for creating high quality loading animations using the Canvas API",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/era-epoch/animautomata.git"
+  },
+  "keywords": [
+    "animation",
+    "canvas",
+    "loader"
+  ],
+  "author": "eraepoch",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/era-epoch/animautomata/issues",
+    "email": "bugs@eracodes.net"
+  },
+  "homepage": "https://github.com/era-epoch/animautomata#readme",
+  "dependencies": {
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^10.0.0"
+  }
+}
