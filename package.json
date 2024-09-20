@@ -11,7 +11,11 @@
     "url": "git+https://github.com/era-epoch/animautomata.git"
   },
   "keywords": [
+    "animautomata",
+    "animautomaton",
     "animation",
+    "frontend",
+    "ui",
     "canvas",
     "loader"
   ],

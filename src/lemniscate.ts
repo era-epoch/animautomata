@@ -1,6 +1,17 @@
+import Animautomaton, { AnimautomatonOps } from "./animautomaton";
+import { Vector2 } from "./types";
 
-import Animautomaton from "./animautomaton";
-import { LemniscateOps, Vector2 } from "./types";
+export type LemniscateOps = AnimautomatonOps & {
+  arcs: number;
+  arcWidth: number;
+  arcWidthDelta: number;
+  tailDelay: number;
+  arcDelay: number;
+  radius: number;
+  radiusDelta: number;
+  xOff: number;
+  mutator: (lemniscate: Lemniscate) => void;
+};
 
 const DrawOrders = [
   "tail",
@@ -62,6 +73,11 @@ class Lemniscate extends Animautomaton {
    * An array of geometric information objects where geometries[i] is the info for the ith arc.
    */
   geometries: LemniscateGeometry[];
+
+  /**
+   * Capture methods that will be overridden to preserve the parent method.
+   */
+  parentDraw = this.draw;
 
   // #region Configurable properties
 
@@ -143,21 +159,6 @@ class Lemniscate extends Animautomaton {
       );
       this.geometries.push(geometry);
     }
-
-    this.drawPath = this.drawPath.bind(this);
-    this.drawArc = this.drawArc.bind(this);
-    this.arcPoints = this.arcPoints.bind(this);
-    this.progressPosition = this.progressPosition.bind(this);
-    this.getSection = this.getSection.bind(this);
-    this.drawSection = this.drawSection.bind(this);
-    this.drawSection_0 = this.drawSection_0.bind(this);
-    this.drawSection_1 = this.drawSection_1.bind(this);
-    this.drawSection_2 = this.drawSection_2.bind(this);
-    this.drawSection_3 = this.drawSection_3.bind(this);
-    this.drawSection_4 = this.drawSection_4.bind(this);
-    this.drawSection_5 = this.drawSection_5.bind(this);
-    this.drawSection_6 = this.drawSection_6.bind(this);
-    this.drawSection_7 = this.drawSection_7.bind(this);
   }
 
   // #region Methods
@@ -222,26 +223,26 @@ class Lemniscate extends Animautomaton {
    * This function is called every {mutationInterval} * {cycleDuration_ms} milliseconds.
    * Used for mutating the animation over time (e.g. between loops).
    */
-  mutate() {
+  mutate = () => {
     this.mutator(this);
-  }
+  };
 
   /**
    * Uses this.context to draw the current frame of the animation, as determined by
    * this.currProgress. Called by this.animate.
    */
-  draw() {
-    super.draw();
+  draw = () => {
+    this.parentDraw();
     // this.drawPath(); // The path that the arcs travel along
     for (let i = 0; i < this.arcs; i++) {
       this.drawArc(i);
     }
-  }
+  };
 
   /**
    * Draws the ith arc.
    */
-  drawArc(arc_i: number) {
+  drawArc = (arc_i: number) => {
     const progress_lead = this.getProgress(this.arcDelay * arc_i);
     const progress_tail = this.getProgress(
       this.arcDelay * arc_i - this.tailDelay
@@ -311,12 +312,12 @@ class Lemniscate extends Animautomaton {
         : (curr_section + 1) % nSections;
     }
     this.ctxDraw();
-  }
+  };
 
   /**
    * Draws the path the arc will travel along.
    */
-  drawPath() {
+  drawPath = () => {
     // Origin
     this.ctxSetColour(-1);
     this.context.beginPath();
@@ -384,14 +385,14 @@ class Lemniscate extends Animautomaton {
       this.origin.y - endpoint_2.y
     );
     this.context.stroke();
-  }
+  };
 
   /**
    * Calculates the necessary positions for the ith arc in the animation.
    * @param i
    * @returns outer_lead, mid_lead, inner_lead, outer_tail, mid_tail, inner_tail
    */
-  arcPoints(i: number): ArcPoints {
+  arcPoints = (i: number): ArcPoints => {
     const progress_lead = this.getProgress(this.arcDelay * i);
     const progress_tail = this.getProgress(this.arcDelay * i - this.tailDelay);
     const lead = this.progressPosition(progress_lead, i);
@@ -401,7 +402,7 @@ class Lemniscate extends Animautomaton {
       tail: tail,
     };
     return points;
-  }
+  };
 
   /**
    * Given a progress value, calculates the useful points that far along the animation's path
@@ -411,7 +412,7 @@ class Lemniscate extends Animautomaton {
    * @param i The index of the arc.
    * @returns Outer, centre, and inner points for the given progress
    */
-  progressPosition(prog: number, i: number): ArcEndPoint {
+  progressPosition = (prog: number, i: number): ArcEndPoint => {
     let outer: Vector2 = { x: 0, y: 0 };
     let inner: Vector2 = { x: 0, y: 0 };
     let mid: Vector2 = { x: 0, y: 0 };
@@ -617,14 +618,14 @@ class Lemniscate extends Animautomaton {
       inner: inner,
       mid: mid,
     };
-  }
+  };
 
   /**
    * @param prog A number between 0 and 1.
    * @param arc_i The index of the arc whose geometry we're interested in.
    * @returns The animation section corresponding to the progress value, or -1 on failure.
    */
-  getSection(prog: number, arc_i: number): number {
+  getSection = (prog: number, arc_i: number): number => {
     for (let i = 0; i < this.geometries[arc_i].checkpoints.length + 1; i++) {
       if (
         prog > this.geometries[arc_i].checkpoints[i] &&
@@ -634,9 +635,14 @@ class Lemniscate extends Animautomaton {
       }
     }
     return -1;
-  }
+  };
 
-  drawSection(section: number, order: DrawOrder, points: ArcPoints, i: number) {
+  drawSection = (
+    section: number,
+    order: DrawOrder,
+    points: ArcPoints,
+    i: number
+  ) => {
     switch (section) {
       case 0:
         this.drawSection_0(order, points, i);
@@ -666,8 +672,8 @@ class Lemniscate extends Animautomaton {
         console.error("Tried to draw invalid section number: " + section);
         break;
     }
-  }
-  drawSection_0(order: DrawOrder, points: ArcPoints, arc_i: number) {
+  };
+  drawSection_0 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 0: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[0],
@@ -705,8 +711,8 @@ class Lemniscate extends Animautomaton {
       default:
         console.error("Tried to draw section with invalid order: " + order);
     }
-  }
-  drawSection_1(order: DrawOrder, points: ArcPoints, arc_i: number) {
+  };
+  drawSection_1 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 1: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[1],
@@ -753,8 +759,8 @@ class Lemniscate extends Animautomaton {
       default:
         console.error("Tried to draw section with invalid order: " + order);
     }
-  }
-  drawSection_2(order: DrawOrder, points: ArcPoints, arc_i: number) {
+  };
+  drawSection_2 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 2: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[2],
@@ -801,8 +807,8 @@ class Lemniscate extends Animautomaton {
       default:
         console.error("Tried to draw section with invalid order: " + order);
     }
-  }
-  drawSection_3(order: DrawOrder, points: ArcPoints, arc_i: number) {
+  };
+  drawSection_3 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 3: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[3],
@@ -840,8 +846,8 @@ class Lemniscate extends Animautomaton {
       default:
         console.error("Tried to draw section with invalid order: " + order);
     }
-  }
-  drawSection_4(order: DrawOrder, points: ArcPoints, arc_i: number) {
+  };
+  drawSection_4 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 4: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[4],
@@ -879,8 +885,8 @@ class Lemniscate extends Animautomaton {
       default:
         console.error("Tried to draw section with invalid order: " + order);
     }
-  }
-  drawSection_5(order: DrawOrder, points: ArcPoints, arc_i: number) {
+  };
+  drawSection_5 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 5: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[5],
@@ -927,8 +933,8 @@ class Lemniscate extends Animautomaton {
       default:
         console.error("Tried to draw section with invalid order: " + order);
     }
-  }
-  drawSection_6(order: DrawOrder, points: ArcPoints, arc_i: number) {
+  };
+  drawSection_6 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 6: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[6],
@@ -975,8 +981,8 @@ class Lemniscate extends Animautomaton {
       default:
         console.error("Tried to draw section with invalid order: " + order);
     }
-  }
-  drawSection_7(order: DrawOrder, points: ArcPoints, arc_i: number) {
+  };
+  drawSection_7 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 7: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[7],
@@ -1015,7 +1021,7 @@ class Lemniscate extends Animautomaton {
       default:
         console.error("Tried to draw section with invalid order: " + order);
     }
-  }
+  };
 }
 
 export default Lemniscate;

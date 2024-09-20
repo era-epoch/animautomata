@@ -1,8 +1,34 @@
-import Animautomaton from "./animautomaton";
-import { Anchor, Border, Linecap, AntiquumOps } from "./types";
+import Animautomaton, { AnimautomatonOps } from "./animautomaton";
+import { Anchor, Border, Linecap } from "./types";
 import { modulo } from "./utils";
 
+export type AntiquumOps = AnimautomatonOps & {
+  arcs: number;
+  arcWidth: number;
+  arcWidthDelta: number;
+  arcAnchor: Anchor;
+  tailDelay: number;
+  arcDelay: number;
+  radius: number;
+  radiusDelta: number;
+  rotations: number;
+  mutator: (antiquum: Antiquum) => void;
+  innerBorder: Border;
+  outerBorder: Border;
+  trackColour: string;
+  lineCap: Linecap;
+  leadCap: Linecap;
+  tailCap: Linecap;
+};
+
 class Antiquum extends Animautomaton {
+  // #region Non-configurable properties
+
+  /**
+   * Capture methods that will be overridden to preserve the parent method.
+   */
+  parentDraw = this.draw;
+
   // #region Configurable properties
   /**
    * The number of individual shapes to draw.
@@ -126,18 +152,18 @@ class Antiquum extends Animautomaton {
    * This function is called every {mutationInterval} * {cycleDuration_ms} milliseconds.
    * Used for mutating the animation over time (e.g. between loops).
    */
-  mutate() {
+  mutate = () => {
     this.mutator(this);
-  }
+  };
 
   /**
    * @returns The number of rotations + partial rotations this animation has performed.
    */
-  getAccumulatedRotation(): number {
+  getAccumulatedRotation = (): number => {
     return (
       (this.currIteration + this.currProgress) * this.rotations * Math.PI * 2
     );
-  }
+  };
 
   /**
    * Uses this.context to draw the current frame of the animation, as determined by
@@ -145,9 +171,9 @@ class Antiquum extends Animautomaton {
    *
    * Called by this.animate().
    */
-  draw() {
+  draw = () => {
     // TODO: Split behaviour into subfunctions
-    super.draw();
+    this.parentDraw();
     const accumulatedRotation = this.getAccumulatedRotation();
 
     // Draw track underneath everything else (if present)
@@ -573,7 +599,7 @@ class Antiquum extends Animautomaton {
       );
       this.context.stroke();
     }
-  }
+  };
 }
 
 export default Antiquum;

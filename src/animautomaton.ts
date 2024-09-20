@@ -1,5 +1,29 @@
-import { clamp, modulo } from "./utils";
-import { Vector2, TimingFunction, DrawStyle, AnimautomatonOps, BezierControlPoints } from "./types";
+import {
+  BezierControlPoints,
+  DrawStyle,
+  TimingFunction,
+  Vector2,
+} from "./types";
+import { clamp, modulo, pseudoUUID } from "./utils";
+
+export type AnimautomatonOps = {
+  backgroundColour: string | null;
+  currProgress: number;
+  lastProgress: number;
+  cycleDuration_ms: number;
+  currIteration: number;
+  nIterations: number;
+  fps: number;
+  paused: boolean;
+  colours: string[];
+  opacity: number;
+  opacityDelta: number;
+  timingFunction: TimingFunction;
+  customTimingFunction: (offset?: number) => number;
+  drawStyle: DrawStyle;
+  rest: number;
+  mutationInterval: number;
+};
 
 /**
  * Abstract parent class containing shared properties and methods for all animautomatons.
@@ -9,8 +33,8 @@ abstract class Animautomaton {
 
   /**
    * A uuid for this object. Generated with crypto.randomUUID().
-   * 
-   * Falls back to performance.now() if not running in a secure context.
+   *
+   * Falls back to pseudoUUID() which uses Math.random() if not running in a secure context.
    */
   id: string;
 
@@ -75,8 +99,8 @@ abstract class Animautomaton {
   lastMutationTimestamp: number;
 
   /**
-   * The canvas element this animation is being drawn on. 
-   * 
+   * The canvas element this animation is being drawn on.
+   *
    * Animations should have their own canvas with nothing else on it.
    */
   canvas: HTMLCanvasElement;
@@ -95,7 +119,7 @@ abstract class Animautomaton {
 
   /**
    * This animation's mutate() method is called after this many iterations.
-   * e.g. If mutationInterval is 0.5, the mutate method will be called halfway through each loop, 
+   * e.g. If mutationInterval is 0.5, the mutate method will be called halfway through each loop,
    * and again at the end of each loop.
    *
    * Default: Infinity (i.e. mutate() is never called)
@@ -111,7 +135,7 @@ abstract class Animautomaton {
 
   /**
    * A number between 0 and 1.
-   * 
+   *
    * This animation will be still in its starting position for this proportion of its duration.
    *
    * Default: 0
@@ -147,7 +171,7 @@ abstract class Animautomaton {
 
   /**
    * A number between 0 and 1.
-   * 
+   *
    * The base transparcency to apply to colours when drawing.
    *
    * Default: 1
@@ -170,7 +194,7 @@ abstract class Animautomaton {
 
   /**
    * This function will be called iff timingFunction = "custom"
-   * 
+   *
    * Custom timing functions must take in an offset to apply to currProgress,
    * and return a value between 0 and 1.
    */
@@ -189,9 +213,8 @@ abstract class Animautomaton {
     if (window.isSecureContext) {
       this.id = crypto.randomUUID();
     } else {
-      this.id = `${performance.now()}`
+      this.id = pseudoUUID();
     }
-    
     this.start = performance.now();
     this.lastDraw = this.start;
     this.lastMutationTimestamp = this.start;
@@ -223,22 +246,6 @@ abstract class Animautomaton {
     this.drawStyle = ops?.drawStyle ?? "fill";
     this.mutationInterval = ops?.mutationInterval ?? Infinity;
     this.currColour = "";
-
-    // Bind functions TODO: Is this necessary? Can it be automated in some way?
-    this.draw = this.draw.bind(this);
-    this.pause = this.pause.bind(this);
-    this.play = this.play.bind(this);
-    this.animate = this.animate.bind(this);
-    this.getProgress = this.getProgress.bind(this);
-    this.getProgressLinear = this.getProgressLinear.bind(this);
-    this.getProgressExponential = this.getProgressExponential.bind(this);
-    this.getProgressSinusoidal = this.getProgressSinusoidal.bind(this);
-    this.ctxDraw = this.ctxDraw.bind(this);
-    this.ctxSetColour = this.ctxSetColour.bind(this);
-    this.drawDot = this.drawDot.bind(this);
-    this.circularBezierControlPoints =
-      this.circularBezierControlPoints.bind(this);
-    this.ctxModifyOpacity = this.ctxModifyOpacity.bind(this);
   }
 
   // #region Methods
@@ -246,7 +253,7 @@ abstract class Animautomaton {
   /**
    * Parent draw() must be called at the start of childrens' draw() methods.
    */
-  draw() {
+  draw = () => {
     // Clear previous render
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -255,20 +262,20 @@ abstract class Animautomaton {
       this.context.fillStyle = this.backgroundColour;
       this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
-  }
+  };
 
   /**
    * Moves the animation 1 frame forward.
    */
-  step() {
+  step = () => {
     this.seek(1);
-  }
+  };
 
   /**
    * Moves the animation immediately a certain number of frames.
    * @param frames Number of frames to seek (negative = rewind)
    */
-  seek(frames: number) {
+  seek = (frames: number) => {
     const msPerFrame = 1000 / this.fps;
     const progressPerFrame = msPerFrame / this.cycleDuration_ms;
     this.lastProgress = this.currProgress;
@@ -279,13 +286,13 @@ abstract class Animautomaton {
     );
     if (this.lastProgress === 1) this.currProgress = 0;
     this.draw();
-  }
+  };
 
   /**
    * This function is called every animation frame & decides whether or not to draw
    * a new frame of this animation, and also whether or not to call mutate().
    */
-  animate() {
+  animate = () => {
     // Cancel animation if paused
     if (this.paused) return;
 
@@ -320,21 +327,21 @@ abstract class Animautomaton {
     }
     this.draw();
     this.lastDraw = now;
-  }
+  };
 
   /**
    * This function is called every {mutationInterval} * {cycleDuration_ms} milliseconds.
    * Used for mutating the animation over time (e.g. between loops).
    * @abstract
    */
-  mutate() {}
+  mutate = () => {};
 
   /**
    * @param offset An amount to either add or subtract from the base progress before transformation.
    * @returns A value between 0 and 1 representing the animation's progress through its loop,
    * transformed according to this.timingFunction.
    */
-  getProgress(offset?: number): number {
+  getProgress = (offset?: number): number => {
     switch (this.timingFunction) {
       case "sinusoidal":
         return this.getProgressSinusoidal(offset);
@@ -350,89 +357,89 @@ abstract class Animautomaton {
       default:
         return this.getProgressLinear(offset);
     }
-  }
+  };
 
-  getProgressLinear(offset?: number): number {
+  getProgressLinear = (offset?: number): number => {
     const offset_progress = offset
       ? (this.currProgress + 1 + offset) % 1
       : this.currProgress;
     const x = Math.min(1, offset_progress / (1 - this.rest));
     return x;
-  }
+  };
 
-  getProgressExponential(pow: number, offset?: number): number {
+  getProgressExponential = (pow: number, offset?: number): number => {
     const offset_progress = offset
       ? (this.currProgress + 1 + offset) % 1
       : this.currProgress;
     const x = Math.min(1, offset_progress / (1 - this.rest));
     return Math.pow(x, pow);
-  }
+  };
 
-  getProgressSinusoidal(offset?: number): number {
+  getProgressSinusoidal = (offset?: number): number => {
     const offset_progress = offset
       ? (this.currProgress + 1 + offset) % 1
       : this.currProgress;
     const x = Math.min(1, offset_progress / (1 - this.rest));
     const t = 0.5 + Math.sin((x - 0.5) * Math.PI) / 2;
     return t;
-  }
+  };
 
   /**
    * Starts or resumes new rendering calls.
    */
-  play() {
+  play = () => {
     this.paused = false;
     const now = performance.now();
     this.lastDraw = now;
     this.pauseDuration += now - this.pauseTimestamp;
     requestAnimationFrame(this.animate);
-  }
+  };
 
   /**
    * Prevents new rendering calls.
    */
-  pause() {
+  pause = () => {
     this.paused = true;
     this.pauseTimestamp = performance.now();
-  }
+  };
 
   /**
    * Draws the current path in this.context based on this.drawStyle.
    */
-  ctxDraw() {
+  ctxDraw = () => {
     if (this.drawStyle == "fill") {
       this.context.fill();
     } else {
       this.context.stroke();
     }
-  }
+  };
 
   /**
    * Moves this.context to position vector v
-   * @param v 
+   * @param v
    */
-  ctxMoveToVector(v: Vector2) {
+  ctxMoveToVector = (v: Vector2) => {
     this.context.moveTo(v.x, v.y);
-  }
+  };
 
   /**
    * Draws a line from the current position of this.context to the position given
    * by vector v.
-   * @param v 
+   * @param v
    */
-  ctxLineToVector(v: Vector2) {
+  ctxLineToVector = (v: Vector2) => {
     this.context.lineTo(v.x, v.y);
-  }
+  };
 
   /**
    * Draws a circular bezier curve from the start position to the end position with the center
    * point of originOffset.
-   * 
-   * @param start 
-   * @param end 
-   * @param originOffset 
+   *
+   * @param start
+   * @param end
+   * @param originOffset
    */
-  ctxCircToVector(start: Vector2, end: Vector2, originOffset: Vector2) {
+  ctxCircToVector = (start: Vector2, end: Vector2, originOffset: Vector2) => {
     const cps = this.circularBezierControlPoints(start, end, originOffset);
     this.context.bezierCurveTo(
       cps.cp1.x,
@@ -442,13 +449,13 @@ abstract class Animautomaton {
       end.x,
       end.y
     );
-  }
+  };
 
   /**
    * Sets both context.strokeStyle and context.fillStyle with appropriate opacity.
    * @param offset The index of the colour in this.colours (wraps around).
    */
-  ctxSetColour(offset: number) {
+  ctxSetColour = (offset: number) => {
     const modOffset = modulo(offset, this.colours.length);
     const opacity = Math.floor(
       Math.max(
@@ -460,16 +467,16 @@ abstract class Animautomaton {
     const colour = `${this.colours[modOffset]}${opacityString}`;
     this.context.strokeStyle = colour;
     this.context.fillStyle = colour;
-    // This is necessary because subseqent access to the colour on the context object does not 
+    // This is necessary because subseqent access to the colour on the context object does not
     // return opacity in some cases, for some unknown reason. TODO: Investigate
     this.currColour = colour;
-  }
+  };
 
   /**
    * Sets new opacity to: currentOpacity + currentOpacity * modifier. Enforces minimum of 0.
    * @param modifier
    */
-  ctxModifyOpacity(modifier: number) {
+  ctxModifyOpacity = (modifier: number) => {
     const styleString = this.currColour;
     const colour = styleString.slice(0, 7);
     const opacity = styleString.slice(7, 9);
@@ -480,12 +487,12 @@ abstract class Animautomaton {
     this.context.strokeStyle = newColour;
     this.context.fillStyle = newColour;
     this.currColour = newColour;
-  }
+  };
 
   /**
    * Draws a radius 2 circle at the position given. Used for debugging.
    */
-  drawDot(pos: Vector2) {
+  drawDot = (pos: Vector2) => {
     this.context.beginPath();
     this.context.arc(
       this.origin.x + pos.x,
@@ -495,7 +502,7 @@ abstract class Animautomaton {
       2 * Math.PI
     );
     this.context.fill();
-  }
+  };
 
   /**
    * Given two points {from} and {to}, calculates the control points necessary to draw a Bezier curve
@@ -505,11 +512,11 @@ abstract class Animautomaton {
    * @param originOffset
    * @returns An object containing the Bezier control points.
    */
-  circularBezierControlPoints(
+  circularBezierControlPoints = (
     from: Vector2,
     to: Vector2,
     originOffset?: Vector2
-  ): BezierControlPoints {
+  ): BezierControlPoints => {
     // Thanks to: https://stackoverflow.com/questions/734076/how-to-best-approximate-a-geometrical-arc-with-a-bezier-curve
     const offset = originOffset ?? { x: 0, y: 0 };
     const ax = from.x - offset.x;
@@ -527,7 +534,7 @@ abstract class Animautomaton {
       cp1: { x: x1, y: y1 },
       cp2: { x: x2, y: y2 },
     };
-  }
+  };
 }
 
 export default Animautomaton;

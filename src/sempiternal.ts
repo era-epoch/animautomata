@@ -1,7 +1,38 @@
-import Animautomaton from "./animautomaton";
-import { HexPulse, SempiternalOps, HexPulseStyle, Vector2 } from "./types";
+import Animautomaton, { AnimautomatonOps } from "./animautomaton";
+import { Vector2 } from "./types";
+
+export type SempiternalOps = AnimautomatonOps & {
+  sideLength: number;
+  circleSize: number;
+  relativeExpansion: number;
+  delay: number;
+  alternateSpin: boolean;
+  rotations: number;
+  mutator: (sempiternal: Sempiternal) => void;
+  opacityPulse: HexPulse;
+  radiusPulse: HexPulse;
+};
+
+/**
+ * A HexPulse is an effect that acts on shapes based on which 'ring' of the hexagonal structure they are in.
+ */
+export type HexPulse = {
+  style: HexPulseStyle;
+  delay: number;
+  intensity: number;
+};
+
+export const HEX_PULSE_STYLES = ["disperse", "coelesce", "off"] as const;
+export type HexPulseStyle = (typeof HEX_PULSE_STYLES)[number];
 
 class Sempiternal extends Animautomaton {
+  // #region Non-configurable properties
+
+  /**
+   * Capture methods that will be overridden to preserve the parent method.
+   */
+  parentDraw = this.draw;
+
   // #region Configurable properties
 
   /**
@@ -78,16 +109,16 @@ class Sempiternal extends Animautomaton {
    * This function is called every {mutationInterval} * {cycleDuration_ms} milliseconds.
    * Used for mutating the animation over time (e.g. between loops).
    */
-  mutate() {
+  mutate = () => {
     this.mutator(this);
-  }
+  };
 
   /**
    * Uses this.context to draw the current frame of the animation, as determined by
    * this.currProgress. Called by this.animate.
    */
-  draw() {
-    super.draw();
+  draw = () => {
+    this.parentDraw();
     for (let i = this.sideLength - 1; i >= 0; i--) {
       let spin =
         this.getProgress(this.delay * i) * Math.PI * 2 * this.rotations;
@@ -149,13 +180,13 @@ class Sempiternal extends Animautomaton {
       }
     }
     return { drewWithCache: false };
-  }
+  };
 
   /**
    * Adjusts this.context's opacity based on the current opacityPulse settings.
    * @param level The ring of the shape.
    */
-  performOpacityPulse(level: number) {
+  performOpacityPulse = (level: number) => {
     const i = level;
     if (this.opacityPulse.style == "coelesce") {
       const pulseProg = this.getProgressLinear(this.opacityPulse.delay * i);
@@ -170,14 +201,14 @@ class Sempiternal extends Animautomaton {
         pulseProg < 0.5 ? -(pulseProg * 2) : -2 + pulseProg * 2
       );
     }
-  }
+  };
 
   /**
    * Calculates the circle radius for a given level with the current radius pulse settings.
    * @param level
    * @returns The effective radius for this level given current progress.
    */
-  performRadiusPulse(level: number): number {
+  performRadiusPulse = (level: number): number => {
     const i = level;
     let effectiveRadius = this.circleSize;
     if (this.radiusPulse.style == "coelesce") {
@@ -198,7 +229,7 @@ class Sempiternal extends Animautomaton {
         radiusModifier * this.radiusPulse.intensity * effectiveRadius;
     }
     return effectiveRadius;
-  }
+  };
 }
 
 export default Sempiternal;
