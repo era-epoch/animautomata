@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "a library for creating high quality loading animations using the Canvas API",
   "main": "src/index.ts",
+  "type": "module",
   "scripts": {
     "test": "npm test"
   },

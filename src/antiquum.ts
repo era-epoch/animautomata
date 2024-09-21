@@ -1,4 +1,4 @@
-import Animautomaton, { AnimautomatonOps } from "./animautomaton";
+import { Animautomaton, AnimautomatonOps } from "./animautomaton";
 import { Anchor, ArcEndPoint, Border, Linecap, Vector2 } from "./types";
 import { modulo } from "./utils";
 
@@ -43,7 +43,7 @@ type Positions = {
 /**
  * An animautomaton based off of the traditional rotating/spinning arc loader.
  */
-class Antiquum extends Animautomaton {
+export class Antiquum extends Animautomaton {
   // #region Configurable properties
   /**
    * The number of individual shapes to draw.
@@ -773,4 +773,3 @@ class Antiquum extends Animautomaton {
   };
 }
 
-export default Antiquum;

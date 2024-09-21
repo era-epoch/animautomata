@@ -35,7 +35,7 @@ export type AnimautomatonOps = {
  * Abstract parent class containing shared properties and methods for all animautomatons.
  */
 
-abstract class Animautomaton {
+export abstract class Animautomaton {
   // #region Non-configurable properties
 
   /**
@@ -543,5 +543,3 @@ abstract class Animautomaton {
     };
   };
 }
-
-export default Animautomaton;

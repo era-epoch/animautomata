@@ -1,4 +1,4 @@
-import Animautomaton, { AnimautomatonOps } from "./animautomaton";
+import { Animautomaton, AnimautomatonOps } from "./animautomaton";
 import { Vector2 } from "./types";
 
 /**
@@ -33,7 +33,7 @@ export type HexPulse = {
 export const HEX_PULSE_STYLES = ["disperse", "coelesce", "off"] as const;
 export type HexPulseStyle = (typeof HEX_PULSE_STYLES)[number];
 
-class Sempiternal extends Animautomaton {
+export class Sempiternal extends Animautomaton {
   // #region Configurable properties
 
   /**
@@ -237,5 +237,3 @@ class Sempiternal extends Animautomaton {
     return effectiveRadius;
   };
 }
-
-export default Sempiternal;

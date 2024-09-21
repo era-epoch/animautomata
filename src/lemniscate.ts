@@ -1,4 +1,4 @@
-import Animautomaton, { AnimautomatonOps } from "./animautomaton";
+import { Animautomaton, AnimautomatonOps } from "./animautomaton";
 import { ArcEndPoint, ArcPoints, Vector2 } from "./types";
 
 /**
@@ -71,7 +71,7 @@ type LemniscateGeometry = {
 /**
  * An animautomaton that draws along a path resembling an infinity symbol.
  */
-class Lemniscate extends Animautomaton {
+export class Lemniscate extends Animautomaton {
   // #region Non-configurable properties
 
   /**
@@ -1033,5 +1033,3 @@ class Lemniscate extends Animautomaton {
     }
   };
 }
-
-export default Lemniscate;
