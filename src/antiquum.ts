@@ -44,13 +44,6 @@ type Positions = {
  * An animautomaton based off of the traditional rotating/spinning arc loader.
  */
 class Antiquum extends Animautomaton {
-  // #region Non-configurable properties
-
-  /**
-   * Capture methods that will be overridden to preserve the parent method.
-   */
-  parentDraw = this.draw;
-
   // #region Configurable properties
   /**
    * The number of individual shapes to draw.
@@ -201,6 +194,9 @@ class Antiquum extends Animautomaton {
   }
 
   // #region Methods
+
+  // Capture the parent version of overridden methods
+  parentDraw = this.draw;
 
   /**
    * This function is called every {mutationInterval} * {cycleDuration_ms} milliseconds.

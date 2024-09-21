@@ -34,17 +34,11 @@ export type Border = {
   colour: string;
 };
 
-/**
- * TODO: document, name better
- */
 export type ArcPoints = {
   lead: ArcEndPoint;
   tail: ArcEndPoint;
 };
 
-/**
- * TODO: document, name better
- */
 export type ArcEndPoint = {
   outer: Vector2;
   mid: Vector2;

@@ -79,11 +79,6 @@ class Lemniscate extends Animautomaton {
    */
   geometries: LemniscateGeometry[];
 
-  /**
-   * Capture methods that will be overridden to preserve the parent method.
-   */
-  parentDraw = this.draw;
-
   // #region Configurable properties
 
   /**
@@ -167,6 +162,9 @@ class Lemniscate extends Animautomaton {
   }
 
   // #region Methods
+
+  // Capture the parent version of overridden methods
+  parentDraw = this.draw;
 
   /**
    * Calculates helpful geomtric information for rendering the lemniscate shape

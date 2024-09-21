@@ -3,7 +3,7 @@ import { Vector2 } from "./types";
 
 /**
  * Configurable properties able to be passed to the Sempiternal constructor.
- * 
+ *
  * Superset of {AnimautomatonOps}.
  *
  * See {Sempiternal} class documentation for explanations.
@@ -34,13 +34,6 @@ export const HEX_PULSE_STYLES = ["disperse", "coelesce", "off"] as const;
 export type HexPulseStyle = (typeof HEX_PULSE_STYLES)[number];
 
 class Sempiternal extends Animautomaton {
-  // #region Non-configurable properties
-
-  /**
-   * Capture methods that will be overridden to preserve the parent method.
-   */
-  parentDraw = this.draw;
-
   // #region Configurable properties
 
   /**
@@ -113,6 +106,9 @@ class Sempiternal extends Animautomaton {
 
   // #region Methods
 
+  // Capture the parent version of overridden methods
+  parentDraw = this.draw;
+
   /**
    * This function is called every {mutationInterval} * {cycleDuration_ms} milliseconds.
    * Used for mutating the animation over time (e.g. between loops).
@@ -126,7 +122,10 @@ class Sempiternal extends Animautomaton {
    * this.currProgress. Called by this.animate.
    */
   draw = () => {
+    // Eq. to super.draw()
     this.parentDraw();
+
+    // Draw outer 'rings' first
     for (let i = this.sideLength - 1; i >= 0; i--) {
       let spin =
         this.getProgress(this.delay * i) * Math.PI * 2 * this.rotations;
@@ -187,7 +186,6 @@ class Sempiternal extends Animautomaton {
         }
       }
     }
-    return { drewWithCache: false };
   };
 
   /**
