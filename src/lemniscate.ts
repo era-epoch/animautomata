@@ -1,6 +1,13 @@
 import Animautomaton, { AnimautomatonOps } from "./animautomaton";
-import { Vector2 } from "./types";
+import { ArcEndPoint, ArcPoints, Vector2 } from "./types";
 
+/**
+ * Configurable properties able to be passed to the Lemniscate constructor.
+ *
+ * Superset of {AnimautomatonOps}.
+ *
+ * See {Lemniscate} class documentation for explanations.
+ */
 export type LemniscateOps = AnimautomatonOps & {
   arcs: number;
   arcWidth: number;
@@ -13,6 +20,9 @@ export type LemniscateOps = AnimautomatonOps & {
   mutator: (lemniscate: Lemniscate) => void;
 };
 
+/**
+ * TODO: document, name better
+ */
 const DrawOrders = [
   "tail",
   "outer-mid",
@@ -22,17 +32,9 @@ const DrawOrders = [
 ] as const;
 type DrawOrder = (typeof DrawOrders)[number];
 
-type ArcEndPoint = {
-  outer: Vector2;
-  mid: Vector2;
-  inner: Vector2;
-};
-
-type ArcPoints = {
-  lead: ArcEndPoint;
-  tail: ArcEndPoint;
-};
-
+/**
+ * Geometric information used for drawing the lemniscate shape.
+ */
 type LemniscateGeometry = {
   /**
    * The slope of line through the origin that is tangent to the circles
@@ -66,6 +68,9 @@ type LemniscateGeometry = {
   checkpoints: number[];
 };
 
+/**
+ * An animautomaton that draws along a path resembling an infinity symbol.
+ */
 class Lemniscate extends Animautomaton {
   // #region Non-configurable properties
 
@@ -243,8 +248,8 @@ class Lemniscate extends Animautomaton {
    * Draws the ith arc.
    */
   drawArc = (arc_i: number) => {
-    const progress_lead = this.getProgress(this.arcDelay * arc_i);
-    const progress_tail = this.getProgress(
+    const leadProgress = this.getProgress(this.arcDelay * arc_i);
+    const tailProgress = this.getProgress(
       this.arcDelay * arc_i - this.tailDelay
     );
 
@@ -263,16 +268,15 @@ class Lemniscate extends Animautomaton {
      * */
 
     const points = this.arcPoints(arc_i);
-    const lead_section = this.getSection(progress_lead, arc_i);
-    const tail_section = this.getSection(progress_tail, arc_i);
+    const leadSection = this.getSection(leadProgress, arc_i);
+    const tailSection = this.getSection(tailProgress, arc_i);
 
     // First, handle the easy case where the arc is contained in a single section
 
-    const contained =
-      tail_section == lead_section && progress_lead > progress_tail;
+    const contained = tailSection == leadSection && leadProgress > tailProgress;
 
     if (contained) {
-      this.drawSection(tail_section, "contained", points, arc_i);
+      this.drawSection(tailSection, "contained", points, arc_i);
       this.ctxDraw();
       return;
     }
@@ -280,36 +284,36 @@ class Lemniscate extends Animautomaton {
     // Drat, the arc is in more than 1 section, so drawing is more complicated
 
     // Start drawing with the tail
-    let curr_section = tail_section;
+    let currSection = tailSection;
     const nSections = this.geometries[arc_i].checkpoints.length - 2;
-    let has_drawn_lead = false;
-    let has_drawn_tail = false;
+    let hasDrawnLead = false;
+    let hasDrawnTail = false;
 
     for (let j = 0; j < 1000; j++) {
       // 1000 is some upper bound on the number of section drawing steps
-      if (curr_section == tail_section && has_drawn_lead) {
+      if (currSection == tailSection && hasDrawnLead) {
         // If we're back in the tail and we've already drawn the lead, then we're done
         break;
-      } else if (curr_section == tail_section && !has_drawn_tail) {
+      } else if (currSection == tailSection && !hasDrawnTail) {
         // Drawing the tail
-        this.drawSection(curr_section, "tail", points, arc_i);
-        has_drawn_tail = true;
-      } else if (curr_section == lead_section) {
+        this.drawSection(currSection, "tail", points, arc_i);
+        hasDrawnTail = true;
+      } else if (currSection == leadSection) {
         // Drawing the lead
-        this.drawSection(curr_section, "lead", points, arc_i);
-        has_drawn_lead = true;
+        this.drawSection(currSection, "lead", points, arc_i);
+        hasDrawnLead = true;
       } else {
         // This is neither the tail, nor lead, so it is a middle section
-        if (has_drawn_lead) {
-          this.drawSection(curr_section, "inner-mid", points, arc_i);
+        if (hasDrawnLead) {
+          this.drawSection(currSection, "inner-mid", points, arc_i);
         } else {
-          this.drawSection(curr_section, "outer-mid", points, arc_i);
+          this.drawSection(currSection, "outer-mid", points, arc_i);
         }
       }
       // Go forwards if we haven't drawn the lead yet, backwards otherwise
-      curr_section = has_drawn_lead
-        ? (curr_section + (nSections - 1)) % nSections
-        : (curr_section + 1) % nSections;
+      currSection = hasDrawnLead
+        ? (currSection + (nSections - 1)) % nSections
+        : (currSection + 1) % nSections;
     }
     this.ctxDraw();
   };
@@ -393,10 +397,10 @@ class Lemniscate extends Animautomaton {
    * @returns outer_lead, mid_lead, inner_lead, outer_tail, mid_tail, inner_tail
    */
   arcPoints = (i: number): ArcPoints => {
-    const progress_lead = this.getProgress(this.arcDelay * i);
-    const progress_tail = this.getProgress(this.arcDelay * i - this.tailDelay);
-    const lead = this.progressPosition(progress_lead, i);
-    const tail = this.progressPosition(progress_tail, i);
+    const leadProgress = this.getProgress(this.arcDelay * i);
+    const tailProgress = this.getProgress(this.arcDelay * i - this.tailDelay);
+    const lead = this.progressPosition(leadProgress, i);
+    const tail = this.progressPosition(tailProgress, i);
     const points: ArcPoints = {
       lead: lead,
       tail: tail,
@@ -641,39 +645,40 @@ class Lemniscate extends Animautomaton {
     section: number,
     order: DrawOrder,
     points: ArcPoints,
-    i: number
+    arc_i: number
   ) => {
     switch (section) {
       case 0:
-        this.drawSection_0(order, points, i);
+        this.draw_NW_Line(order, points, arc_i);
         break;
       case 1:
-        this.drawSection_1(order, points, i);
+        this.draw_NW_Arc(order, points, arc_i);
         break;
       case 2:
-        this.drawSection_2(order, points, i);
+        this.draw_SW_Arc(order, points, arc_i);
         break;
       case 3:
-        this.drawSection_3(order, points, i);
+        this.draw_SW_Line(order, points, arc_i);
         break;
       case 4:
-        this.drawSection_4(order, points, i);
+        this.draw_NE_Line(order, points, arc_i);
         break;
       case 5:
-        this.drawSection_5(order, points, i);
+        this.draw_NE_Arc(order, points, arc_i);
         break;
       case 6:
-        this.drawSection_6(order, points, i);
+        this.draw_SE_Arc(order, points, arc_i);
         break;
       case 7:
-        this.drawSection_7(order, points, i);
+        this.draw_SE_Line(order, points, arc_i);
         break;
       default:
         console.error("Tried to draw invalid section number: " + section);
         break;
     }
   };
-  drawSection_0 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
+
+  draw_NW_Line = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 0: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[0],
@@ -712,7 +717,8 @@ class Lemniscate extends Animautomaton {
         console.error("Tried to draw section with invalid order: " + order);
     }
   };
-  drawSection_1 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
+
+  draw_NW_Arc = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 1: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[1],
@@ -760,7 +766,8 @@ class Lemniscate extends Animautomaton {
         console.error("Tried to draw section with invalid order: " + order);
     }
   };
-  drawSection_2 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
+
+  draw_SW_Arc = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 2: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[2],
@@ -808,7 +815,8 @@ class Lemniscate extends Animautomaton {
         console.error("Tried to draw section with invalid order: " + order);
     }
   };
-  drawSection_3 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
+
+  draw_SW_Line = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 3: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[3],
@@ -847,7 +855,8 @@ class Lemniscate extends Animautomaton {
         console.error("Tried to draw section with invalid order: " + order);
     }
   };
-  drawSection_4 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
+
+  draw_NE_Line = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 4: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[4],
@@ -886,7 +895,8 @@ class Lemniscate extends Animautomaton {
         console.error("Tried to draw section with invalid order: " + order);
     }
   };
-  drawSection_5 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
+
+  draw_NE_Arc = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 5: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[5],
@@ -934,7 +944,8 @@ class Lemniscate extends Animautomaton {
         console.error("Tried to draw section with invalid order: " + order);
     }
   };
-  drawSection_6 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
+
+  draw_SE_Arc = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 6: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[6],
@@ -982,7 +993,8 @@ class Lemniscate extends Animautomaton {
         console.error("Tried to draw section with invalid order: " + order);
     }
   };
-  drawSection_7 = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
+
+  draw_SE_Line = (order: DrawOrder, points: ArcPoints, arc_i: number) => {
     // console.log(`Drawing section 7: ${order}`);
     const lowerBoundPoint = this.progressPosition(
       this.geometries[arc_i].checkpoints[7],

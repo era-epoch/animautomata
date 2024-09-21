@@ -1,6 +1,13 @@
 import Animautomaton, { AnimautomatonOps } from "./animautomaton";
 import { Vector2 } from "./types";
 
+/**
+ * Configurable properties able to be passed to the Sempiternal constructor.
+ * 
+ * Superset of {AnimautomatonOps}.
+ *
+ * See {Sempiternal} class documentation for explanations.
+ */
 export type SempiternalOps = AnimautomatonOps & {
   sideLength: number;
   circleSize: number;
@@ -14,7 +21,8 @@ export type SempiternalOps = AnimautomatonOps & {
 };
 
 /**
- * A HexPulse is an effect that acts on shapes based on which 'ring' of the hexagonal structure they are in.
+ * Represents an effect that acts on Sempiternal shapes based on which 'ring'
+ * of the hexagonal structure they are in.
  */
 export type HexPulse = {
   style: HexPulseStyle;

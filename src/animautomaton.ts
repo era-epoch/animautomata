@@ -6,6 +6,12 @@ import {
 } from "./types";
 import { clamp, modulo, pseudoUUID } from "./utils";
 
+/**
+ * Configurable properties able to be passed to *all* Animautomaton constructors.
+ *
+ * See {Animautomaton} class documentation for explanations.
+ */
+
 export type AnimautomatonOps = {
   backgroundColour: string | null;
   currProgress: number;
@@ -28,6 +34,7 @@ export type AnimautomatonOps = {
 /**
  * Abstract parent class containing shared properties and methods for all animautomatons.
  */
+
 abstract class Animautomaton {
   // #region Non-configurable properties
 
