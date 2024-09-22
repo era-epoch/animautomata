@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "test": "npm test"
+    "test": "npm test",
+    "build": "esbuild src/index.ts --bundle --minify --outfile=dist/animautomata.min.js"
   },
   "repository": {
     "type": "git",
@@ -26,5 +27,8 @@
     "url": "https://github.com/era-epoch/animautomata/issues",
     "email": "bugs@eracodes.net"
   },
-  "homepage": "https://github.com/era-epoch/animautomata#readme"
+  "homepage": "https://github.com/era-epoch/animautomata#readme",
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
 }
