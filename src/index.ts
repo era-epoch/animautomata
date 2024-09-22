@@ -1,4 +1,5 @@
-export { Animautomaton } from "./animautomaton";
-export { Antiquum } from "./antiquum";
-export { Lemniscate } from "./lemniscate";
-export { Sempiternal } from "./sempiternal";
+export * from "./animautomaton";
+export * from "./antiquum";
+export * from "./lemniscate";
+export * from "./sempiternal";
+export * from "./types";
