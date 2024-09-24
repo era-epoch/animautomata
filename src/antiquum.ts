@@ -20,12 +20,12 @@ export type AntiquumOps = AnimautomatonOps & {
   radiusDelta: number;
   rotations: number;
   mutator: (antiquum: Antiquum) => void;
-  innerBorder: Border;
-  outerBorder: Border;
-  trackColour: string;
+  innerBorder: Border | null;
+  outerBorder: Border | null;
+  trackColour: string | null;
   lineCap: Linecap;
-  leadCap: Linecap;
-  tailCap: Linecap;
+  leadCap: Linecap | null;
+  tailCap: Linecap | null;
 };
 
 type Offsets = { outer: number; inner: number; mid: number };
@@ -172,6 +172,12 @@ export class Antiquum extends Animautomaton {
 
   // #region Constructor
 
+  /**
+   * Creates a new Antiquum animautomaton.
+   *
+   * @param canvasId The id of an HTMLCanvasElement on the page that this animation will render to.
+   * @param ops An object containing one or more valid {AntiquumOps} properties.
+   */
   constructor(canvasId: string, ops?: Partial<AntiquumOps>) {
     super(canvasId, ops);
     const canvasMin = Math.min(this.canvas.width, this.canvas.height);
@@ -197,6 +203,24 @@ export class Antiquum extends Animautomaton {
 
   // Capture the parent version of overridden methods
   parentDraw = this.draw;
+
+  /**
+   * Sets one or more configurable properties of this Animautomaton.
+   *
+   * @param ops An object containing one or more valid {AntiquumOps} properties.
+   */
+  setOps = (ops: Partial<AntiquumOps>) => {
+    const thisOps: AntiquumOps = this; // Widen this
+    // Switch to generics
+    (Object.keys(ops) as readonly (keyof AntiquumOps)[]).forEach(
+      <K extends keyof AntiquumOps>(key: K) => {
+        const option = ops[key];
+        if (option !== undefined) {
+          thisOps[key] = option;
+        }
+      }
+    );
+  };
 
   /**
    * This function is called every {mutationInterval} * {cycleDuration_ms} milliseconds.
@@ -772,4 +796,3 @@ export class Antiquum extends Animautomaton {
     };
   };
 }
-

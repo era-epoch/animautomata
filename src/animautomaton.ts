@@ -205,7 +205,7 @@ export abstract class Animautomaton {
    * Custom timing functions must take in an offset to apply to currProgress,
    * and return a value between 0 and 1.
    */
-  customTimingFunction: ((offset?: number) => number) | null;
+  customTimingFunction: (offset?: number) => number;
 
   /**
    * Represents which Context2D drawing function to call.
@@ -216,6 +216,12 @@ export abstract class Animautomaton {
 
   // #region Constructor
 
+  /**
+   * Creates a new Animautomaton.
+   *
+   * @param canvasId The id of an HTMLCanvasElement on the page that this animation will render to.
+   * @param ops An object containing one or more valid {AnimautomatonOps} properties.
+   */
   constructor(canvasId: string, ops?: Partial<AnimautomatonOps>) {
     if (window.isSecureContext) {
       this.id = crypto.randomUUID();
@@ -249,7 +255,8 @@ export abstract class Animautomaton {
     this.opacity = ops?.opacity ?? 1;
     this.opacityDelta = ops?.opacityDelta ?? 0;
     this.timingFunction = ops?.timingFunction ?? "sinusoidal";
-    this.customTimingFunction = ops?.customTimingFunction ?? null;
+    this.customTimingFunction =
+      ops?.customTimingFunction ?? this.getProgressLinear;
     this.drawStyle = ops?.drawStyle ?? "fill";
     this.mutationInterval = ops?.mutationInterval ?? Infinity;
     this.currColour = "";

@@ -12,4 +12,4 @@ Animautomata is a library for creating high quality geometric animations on an H
 - Zero-dependency.
 - Simple but deeply configurable API.
 - Plug-and-play React components are available with [`animautomata-react`](https://github.com/era-epoch/animautomata-react).
-- No image files. The minified library size is ~28kb. For comparison [the first google image result for "loading animation gif"](https://i.sstatic.net/kOnzy.gif) is ~80kb.
+- No image files == faster loading. The minified library size is ~28kb. For comparison [the first google image result for "loading animation gif"](https://i.sstatic.net/kOnzy.gif) is over 80kb.

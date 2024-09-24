@@ -85,6 +85,12 @@ export class Sempiternal extends Animautomaton {
 
   // #region Constructor
 
+  /**
+   * Creates a new Sempiternal animautomaton.
+   *
+   * @param canvasId The id of an HTMLCanvasElement on the page that this animation will render to.
+   * @param ops An object containing one or more valid {SempiternalOps} properties.
+   */
   constructor(canvasId: string, ops?: Partial<SempiternalOps>) {
     super(canvasId, ops);
     const defaultPulse = {
@@ -108,6 +114,24 @@ export class Sempiternal extends Animautomaton {
 
   // Capture the parent version of overridden methods
   parentDraw = this.draw;
+
+  /**
+   * Sets one or more configurable properties of this Animautomaton.
+   *
+   * @param ops An object containing one or more valid {SempiternalOps} properties.
+   */
+  setOps = (ops: Partial<SempiternalOps>) => {
+    const thisOps: SempiternalOps = this; // Widen this
+    // Switch to generics
+    (Object.keys(ops) as readonly (keyof SempiternalOps)[]).forEach(
+      <K extends keyof SempiternalOps>(key: K) => {
+        const option = ops[key];
+        if (option !== undefined) {
+          thisOps[key] = option;
+        }
+      }
+    );
+  };
 
   /**
    * This function is called every {mutationInterval} * {cycleDuration_ms} milliseconds.

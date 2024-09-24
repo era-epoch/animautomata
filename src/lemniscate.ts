@@ -139,6 +139,12 @@ export class Lemniscate extends Animautomaton {
 
   // #region Constructor
 
+  /**
+   * Creates a new Lemniscate animautomaton.
+   *
+   * @param canvasId The id of an HTMLCanvasElement on the page that this animation will render to.
+   * @param ops An object containing one or more valid {LemniscateOps} properties.
+   */
   constructor(canvasId: string, ops?: Partial<LemniscateOps>) {
     super(canvasId, ops);
     this.arcs = ops?.arcs ?? 1;
@@ -165,6 +171,24 @@ export class Lemniscate extends Animautomaton {
 
   // Capture the parent version of overridden methods
   parentDraw = this.draw;
+
+  /**
+   * Sets one or more configurable properties of this Animautomaton.
+   *
+   * @param ops An object containing one or more valid {LemniscateOps} properties.
+   */
+  setOps = (ops: Partial<LemniscateOps>) => {
+    const thisOps: LemniscateOps = this; // Widen this
+    // Switch to generics
+    (Object.keys(ops) as readonly (keyof LemniscateOps)[]).forEach(
+      <K extends keyof LemniscateOps>(key: K) => {
+        const option = ops[key];
+        if (option !== undefined) {
+          thisOps[key] = option;
+        }
+      }
+    );
+  };
 
   /**
    * Calculates helpful geomtric information for rendering the lemniscate shape
