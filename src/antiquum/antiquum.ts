@@ -1,6 +1,6 @@
-import { Animautomaton, AnimautomatonOps } from "./animautomaton";
-import { Anchor, ArcEndPoint, Border, Linecap, Vector2 } from "./types";
-import { modulo } from "./utils";
+import { Animautomaton, AnimautomatonOps } from "../animautomaton";
+import { Anchor, ArcEndPoint, Border, Linecap, Vector2 } from "../types";
+import { modulo } from "../utils";
 
 /**
  * Configurable properties able to be passed to the Antiquum constructor.
@@ -19,7 +19,6 @@ export type AntiquumOps = AnimautomatonOps & {
   radius: number;
   radiusDelta: number;
   rotations: number;
-  mutator: (antiquum: Antiquum) => void;
   innerBorder: Border | null;
   outerBorder: Border | null;
   trackColour: string | null;
@@ -122,13 +121,6 @@ export class Antiquum extends Animautomaton {
   rotations: number;
 
   /**
-   * An optional function that modifies {this}, will be called every mutation interval.
-   *
-   * Can be used to procedurally change the animation properties (e.g. between loops).
-   */
-  mutator: (antiquum: Antiquum) => void;
-
-  /**
    * If not null, defines the style of the inner border.
    *
    * Default: null
@@ -179,55 +171,59 @@ export class Antiquum extends Animautomaton {
    * @param ops An object containing one or more valid {AntiquumOps} properties.
    */
   constructor(canvasId: string, ops?: Partial<AntiquumOps>) {
-    super(canvasId, ops);
+    // Parent constructor
+    super(canvasId);
+
+    // Set default configuration
     const canvasMin = Math.min(this.canvas.width, this.canvas.height);
-    this.arcs = ops?.arcs ?? 1;
-    this.arcWidth = ops?.arcWidth ?? 10;
-    this.arcWidthDelta = ops?.arcWidthDelta ?? 0.02;
-    this.arcAnchor = ops?.arcAnchor ?? "centre";
-    this.tailDelay = ops?.tailDelay ?? 0.1;
-    this.arcDelay = ops?.arcDelay ?? 0.1;
-    this.radius = ops?.radius ?? Math.floor(canvasMin * 0.75);
-    this.radiusDelta = ops?.radiusDelta ?? 0;
-    this.rotations = ops?.rotations ?? 1;
-    this.mutator = ops?.mutator ?? (() => void 0);
-    this.innerBorder = ops?.innerBorder ?? null;
-    this.outerBorder = ops?.outerBorder ?? null;
-    this.trackColour = ops?.trackColour ?? "";
-    this.lineCap = ops?.lineCap ?? "rounded";
-    this.leadCap = ops?.leadCap ?? null;
-    this.tailCap = ops?.tailCap ?? null;
+    this.arcs = 1;
+    this.arcWidth = 10;
+    this.arcWidthDelta = 0.02;
+    this.arcAnchor = "centre";
+    this.tailDelay = 0.25;
+    this.arcDelay = 0.1;
+    this.radius = Math.floor(canvasMin * 0.75);
+    this.radiusDelta = 0;
+    this.rotations = 1;
+    this.innerBorder = null;
+    this.outerBorder = null;
+    this.trackColour = "";
+    this.lineCap = "rounded";
+    this.leadCap = null;
+    this.tailCap = null;
+
+    // Set initial configuration
+    if (ops) this.setConfig(ops);
   }
 
   // #region Methods
 
   // Capture the parent version of overridden methods
   parentDraw = this.draw;
+  parentSetConfig = this.setConfig;
 
   /**
    * Sets one or more configurable properties of this Animautomaton.
    *
    * @param ops An object containing one or more valid {AntiquumOps} properties.
    */
-  setOps = (ops: Partial<AntiquumOps>) => {
-    const thisOps: AntiquumOps = this; // Widen this
-    // Switch to generics
-    (Object.keys(ops) as readonly (keyof AntiquumOps)[]).forEach(
-      <K extends keyof AntiquumOps>(key: K) => {
-        const option = ops[key];
-        if (option !== undefined) {
-          thisOps[key] = option;
-        }
-      }
-    );
-  };
-
-  /**
-   * This function is called every {mutationInterval} * {cycleDuration_ms} milliseconds.
-   * Used for mutating the animation over time (e.g. between loops).
-   */
-  mutate = () => {
-    this.mutator(this);
+  setConfig = (ops: Partial<AntiquumOps>) => {
+    this.parentSetConfig(ops);
+    this.arcs = ops.arcs ?? this.arcs;
+    this.arcWidth = ops.arcWidth ?? this.arcWidth;
+    this.arcWidthDelta = ops.arcWidthDelta ?? this.arcWidthDelta;
+    this.arcAnchor = ops.arcAnchor ?? this.arcAnchor;
+    this.tailDelay = ops.tailDelay ?? this.tailDelay;
+    this.arcDelay = ops.arcDelay ?? this.arcDelay;
+    this.radius = ops.radius ?? this.radius;
+    this.radiusDelta = ops.radiusDelta ?? this.radiusDelta;
+    this.rotations = ops.rotations ?? this.rotations;
+    this.innerBorder = ops.innerBorder ?? this.innerBorder;
+    this.outerBorder = ops.outerBorder ?? this.outerBorder;
+    this.trackColour = ops.trackColour ?? this.trackColour;
+    this.lineCap = ops.lineCap ?? this.lineCap;
+    this.leadCap = ops.leadCap ?? this.leadCap;
+    this.tailCap = ops.tailCap ?? this.tailCap;
   };
 
   /**

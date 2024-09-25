@@ -5,20 +5,22 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "test": "npm test",
-    "build": "esbuild src/index.ts --bundle --minify --outfile=dist/animautomata.min.js"
+    "dev": "vite",
+    "test": "jest",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/era-epoch/animautomata.git"
   },
   "keywords": [
-    "animautomata",
-    "animautomaton",
     "animation",
     "frontend",
     "ui",
     "canvas",
+    "animautomaton",
+    "loading animation",
     "loader"
   ],
   "author": "eraepoch",
@@ -29,6 +31,11 @@
   },
   "homepage": "https://github.com/era-epoch/animautomata#readme",
   "devDependencies": {
-    "esbuild": "^0.24.0"
+    "@types/jest": "^29.5.13",
+    "esbuild": "^0.24.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.7"
   }
 }

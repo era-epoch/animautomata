@@ -1,5 +1,5 @@
-import { Animautomaton, AnimautomatonOps } from "./animautomaton";
-import { ArcEndPoint, ArcPoints, Vector2 } from "./types";
+import { Animautomaton, AnimautomatonOps } from "../animautomaton";
+import { ArcEndPoint, ArcPoints, Vector2 } from "../types";
 
 /**
  * Configurable properties able to be passed to the Lemniscate constructor.
@@ -17,7 +17,6 @@ export type LemniscateOps = AnimautomatonOps & {
   radius: number;
   radiusDelta: number;
   xOff: number;
-  mutator: (lemniscate: Lemniscate) => void;
 };
 
 /**
@@ -115,13 +114,6 @@ export class Lemniscate extends Animautomaton {
   xOff: number;
 
   /**
-   * An optional function that modifies {this}, will be called every mutation interval.
-   *
-   * Can be used to procedurally change the animation properties (e.g. between loops).
-   */
-  mutator: (lemniscate: Lemniscate) => void;
-
-  /**
    * Only has an effect with multiple arcs. Each arc will travel along a path with radius this
    * much less (proportional to primary radius).
    *
@@ -146,17 +138,18 @@ export class Lemniscate extends Animautomaton {
    * @param ops An object containing one or more valid {LemniscateOps} properties.
    */
   constructor(canvasId: string, ops?: Partial<LemniscateOps>) {
-    super(canvasId, ops);
-    this.arcs = ops?.arcs ?? 1;
-    this.arcWidth = ops?.arcWidth ?? 10;
-    this.arcWidthDelta = ops?.arcWidthDelta ?? 0;
-    this.tailDelay = ops?.tailDelay ?? 0.2;
-    this.arcDelay = ops?.arcDelay ?? 0.1;
-    this.radius = ops?.radius ?? this.canvas.width / 8;
-    this.radiusDelta = ops?.radiusDelta ?? 0;
-    this.xOff = ops?.xOff ?? this.radius * 2;
-    this.mutator = ops?.mutator ?? (() => void 0);
+    // Parent constructor
+    super(canvasId);
 
+    // Default configuration
+    this.arcs = 1;
+    this.arcWidth = 10;
+    this.arcWidthDelta = 0;
+    this.tailDelay = 0.2;
+    this.arcDelay = 0.1;
+    this.radius = this.canvas.width / 8;
+    this.radiusDelta = 0;
+    this.xOff = this.radius * 2;
     this.geometries = [];
     for (let i = 0; i < this.arcs; i++) {
       const geometry = this.deriveGeometry(
@@ -165,29 +158,40 @@ export class Lemniscate extends Animautomaton {
       );
       this.geometries.push(geometry);
     }
+
+    // Set initial configuration
+    if (ops) this.setConfig(ops);
   }
 
   // #region Methods
 
   // Capture the parent version of overridden methods
   parentDraw = this.draw;
+  parentSetConfig = this.setConfig;
 
   /**
    * Sets one or more configurable properties of this Animautomaton.
    *
    * @param ops An object containing one or more valid {LemniscateOps} properties.
    */
-  setOps = (ops: Partial<LemniscateOps>) => {
-    const thisOps: LemniscateOps = this; // Widen this
-    // Switch to generics
-    (Object.keys(ops) as readonly (keyof LemniscateOps)[]).forEach(
-      <K extends keyof LemniscateOps>(key: K) => {
-        const option = ops[key];
-        if (option !== undefined) {
-          thisOps[key] = option;
-        }
-      }
-    );
+  setConfig = (ops: Partial<LemniscateOps>) => {
+    this.parentSetConfig(ops);
+    this.arcs = ops?.arcs ?? this.arcs;
+    this.arcWidth = ops?.arcWidth ?? this.arcWidth;
+    this.arcWidthDelta = ops?.arcWidthDelta ?? this.arcWidthDelta;
+    this.tailDelay = ops?.tailDelay ?? this.tailDelay;
+    this.arcDelay = ops?.arcDelay ?? this.arcDelay;
+    this.radius = ops?.radius ?? this.radius;
+    this.radiusDelta = ops?.radiusDelta ?? this.radiusDelta;
+    this.xOff = ops?.xOff ?? this.xOff;
+    this.geometries = [];
+    for (let i = 0; i < this.arcs; i++) {
+      const geometry = this.deriveGeometry(
+        this.radius - i * this.radiusDelta * this.radius,
+        this.xOff
+      );
+      this.geometries.push(geometry);
+    }
   };
 
   /**
@@ -245,14 +249,6 @@ export class Lemniscate extends Animautomaton {
       checkpoints: checkpoints,
     };
   }
-
-  /**
-   * This function is called every {mutationInterval} * {cycleDuration_ms} milliseconds.
-   * Used for mutating the animation over time (e.g. between loops).
-   */
-  mutate = () => {
-    this.mutator(this);
-  };
 
   /**
    * Uses this.context to draw the current frame of the animation, as determined by

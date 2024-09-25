@@ -14,6 +14,8 @@ import { clamp, modulo, pseudoUUID } from "./utils";
 
 export type AnimautomatonOps = {
   backgroundColour: string | null;
+  canvasWidth: number;
+  canvasHeight: number;
   currProgress: number;
   lastProgress: number;
   cycleDuration_ms: number;
@@ -222,7 +224,8 @@ export abstract class Animautomaton {
    * @param canvasId The id of an HTMLCanvasElement on the page that this animation will render to.
    * @param ops An object containing one or more valid {AnimautomatonOps} properties.
    */
-  constructor(canvasId: string, ops?: Partial<AnimautomatonOps>) {
+  constructor(canvasId: string) {
+    // Initialize non-config properties
     if (window.isSecureContext) {
       this.id = crypto.randomUUID();
     } else {
@@ -241,28 +244,64 @@ export abstract class Animautomaton {
       x: Math.floor(this.canvas.width / 2),
       y: Math.floor(this.canvas.height / 2),
     };
-    this.backgroundColour = ops?.backgroundColour ?? null;
-    this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
-    this.currProgress = ops?.currProgress ?? 0;
-    this.lastProgress = ops?.lastProgress ?? 0;
-    this.rest = ops?.rest ?? 0;
-    this.fps = ops?.fps ?? 60;
-    this.cycleDuration_ms = ops?.cycleDuration_ms ?? 1000;
-    this.currIteration = ops?.currIteration ?? 0;
-    this.nIterations = ops?.nIterations ?? Infinity;
-    this.paused = ops?.paused ?? false;
-    this.colours = ops?.colours ?? [];
-    this.opacity = ops?.opacity ?? 1;
-    this.opacityDelta = ops?.opacityDelta ?? 0;
-    this.timingFunction = ops?.timingFunction ?? "sinusoidal";
-    this.customTimingFunction =
-      ops?.customTimingFunction ?? this.getProgressLinear;
-    this.drawStyle = ops?.drawStyle ?? "fill";
-    this.mutationInterval = ops?.mutationInterval ?? Infinity;
     this.currColour = "";
+    this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+
+    // Set default configuration
+    this.backgroundColour = null;
+    this.currProgress = 0;
+    this.lastProgress = 0;
+    this.rest = 0;
+    this.fps = 60;
+    this.cycleDuration_ms = 1500;
+    this.currIteration = 0;
+    this.nIterations = Infinity;
+    this.paused = false;
+    this.colours = ["#000000"];
+    this.opacity = 1;
+    this.opacityDelta = 0;
+    this.timingFunction = "sinusoidal";
+    this.customTimingFunction = this.getProgressLinear;
+    this.drawStyle = "fill";
+    this.mutationInterval = Infinity;
+
+    // Initial configuration from {ops} will be set in child class constructor.
   }
 
   // #region Methods
+
+  /**
+   * Sets one or more configurable properties of this Animautomaton.
+   *
+   * @param ops An object containing one or more valid {AnimautomatonOps} properties.
+   */
+  setConfig = (ops: Partial<AnimautomatonOps>) => {
+    this.backgroundColour = ops.backgroundColour ?? this.backgroundColour;
+    this.currProgress = ops.currProgress ?? this.currProgress;
+    this.lastProgress = ops.lastProgress ?? this.lastProgress;
+    this.rest = ops.rest ?? this.rest;
+    this.fps = ops.fps ?? this.fps;
+    this.cycleDuration_ms = ops.cycleDuration_ms ?? this.cycleDuration_ms;
+    this.currIteration = ops.currIteration ?? this.currIteration;
+    this.nIterations = ops.nIterations ?? this.nIterations;
+    this.paused = ops.paused ?? this.paused;
+    this.colours = ops.colours ?? this.colours;
+    this.opacity = ops.opacity ?? this.opacity;
+    this.opacityDelta = ops.opacityDelta ?? this.opacityDelta;
+    this.timingFunction = ops.timingFunction ?? this.timingFunction;
+    this.customTimingFunction =
+      ops.customTimingFunction ?? this.customTimingFunction;
+    this.drawStyle = ops.drawStyle ?? this.drawStyle;
+    this.mutationInterval = ops.mutationInterval ?? this.mutationInterval;
+    this.canvas.width = ops.canvasWidth ?? this.canvas.width;
+    this.canvas.height = ops.canvasHeight ?? this.canvas.height;
+
+    // Side effects
+    this.origin = {
+      x: Math.floor(this.canvas.width / 2),
+      y: Math.floor(this.canvas.height / 2),
+    };
+  };
 
   /**
    * Parent draw() must be called at the start of childrens' draw() methods.

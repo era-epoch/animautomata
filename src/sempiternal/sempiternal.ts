@@ -1,5 +1,5 @@
-import { Animautomaton, AnimautomatonOps } from "./animautomaton";
-import { Vector2 } from "./types";
+import { Animautomaton, AnimautomatonOps } from "../animautomaton";
+import { Vector2 } from "../types";
 
 /**
  * Configurable properties able to be passed to the Sempiternal constructor.
@@ -15,7 +15,6 @@ export type SempiternalOps = AnimautomatonOps & {
   delay: number;
   alternateSpin: boolean;
   rotations: number;
-  mutator: (sempiternal: Sempiternal) => void;
   opacityPulse: HexPulse;
   radiusPulse: HexPulse;
 };
@@ -57,13 +56,6 @@ export class Sempiternal extends Animautomaton {
   delay: number;
 
   /**
-   * An optional function that modifies {this}, will be called every mutation interval.
-   *
-   * Can be used to procedurally change the animation properties (e.g. between loops).
-   */
-  mutator: (sempiternal: Sempiternal) => void;
-
-  /**
    * If true: every other ring will rotate in the opposite direction.
    */
   alternateSpin: boolean;
@@ -92,53 +84,51 @@ export class Sempiternal extends Animautomaton {
    * @param ops An object containing one or more valid {SempiternalOps} properties.
    */
   constructor(canvasId: string, ops?: Partial<SempiternalOps>) {
-    super(canvasId, ops);
+    // Parent constructor
+    super(canvasId);
+
+    // Default configuration
     const defaultPulse = {
       style: "off" as HexPulseStyle,
       delay: 0.1,
       intensity: 1,
     };
-    this.sideLength = ops?.sideLength ?? 3;
-    this.circleSize = ops?.circleSize ?? this.canvas.width / 8;
-    this.relativeExpansion = ops?.relativeExpansion ?? 1;
-    this.delay = ops?.delay ?? 0.1;
-    this.alternateSpin = ops?.alternateSpin ?? false;
-    this.drawStyle = ops?.drawStyle ?? "stroke";
-    this.mutator = ops?.mutator ?? (() => void 0);
-    this.rotations = ops?.rotations ?? 1;
-    this.opacityPulse = ops?.opacityPulse ?? structuredClone(defaultPulse);
-    this.radiusPulse = ops?.radiusPulse ?? structuredClone(defaultPulse);
+    this.sideLength = 3;
+    this.circleSize = this.canvas.width / 8;
+    this.relativeExpansion = 1;
+    this.delay = 0.1;
+    this.alternateSpin = false;
+    this.drawStyle = "stroke";
+    this.rotations = 1;
+    this.opacityPulse = structuredClone(defaultPulse);
+    this.radiusPulse = structuredClone(defaultPulse);
+
+    // Set initial configuration
+    if (ops) this.setConfig(ops);
   }
 
   // #region Methods
 
   // Capture the parent version of overridden methods
   parentDraw = this.draw;
+  parentSetConfig = this.setConfig;
 
   /**
    * Sets one or more configurable properties of this Animautomaton.
    *
    * @param ops An object containing one or more valid {SempiternalOps} properties.
    */
-  setOps = (ops: Partial<SempiternalOps>) => {
-    const thisOps: SempiternalOps = this; // Widen this
-    // Switch to generics
-    (Object.keys(ops) as readonly (keyof SempiternalOps)[]).forEach(
-      <K extends keyof SempiternalOps>(key: K) => {
-        const option = ops[key];
-        if (option !== undefined) {
-          thisOps[key] = option;
-        }
-      }
-    );
-  };
-
-  /**
-   * This function is called every {mutationInterval} * {cycleDuration_ms} milliseconds.
-   * Used for mutating the animation over time (e.g. between loops).
-   */
-  mutate = () => {
-    this.mutator(this);
+  setConfig = (ops: Partial<SempiternalOps>) => {
+    this.parentSetConfig(ops);
+    this.sideLength = ops?.sideLength ?? this.sideLength;
+    this.circleSize = ops?.circleSize ?? this.circleSize;
+    this.relativeExpansion = ops?.relativeExpansion ?? this.relativeExpansion;
+    this.delay = ops?.delay ?? this.delay;
+    this.alternateSpin = ops?.alternateSpin ?? this.alternateSpin;
+    this.drawStyle = ops?.drawStyle ?? this.drawStyle;
+    this.rotations = ops?.rotations ?? this.rotations;
+    this.opacityPulse = ops?.opacityPulse ?? this.opacityPulse;
+    this.radiusPulse = ops?.radiusPulse ?? this.radiusPulse;
   };
 
   /**

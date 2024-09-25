@@ -1,0 +1,21 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.animations {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100vw;
+  padding: 1rem;
+}
+
+canvas {
+  width: fit-content;
+  height: fit-content;
+}
