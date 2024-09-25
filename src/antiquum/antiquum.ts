@@ -162,7 +162,7 @@ export class Antiquum extends Animautomaton {
    */
   tailCap: Linecap | null;
 
-  // #region Constructor
+  // #region Methods
 
   /**
    * Creates a new Antiquum animautomaton.
@@ -175,14 +175,19 @@ export class Antiquum extends Animautomaton {
     super(canvasId);
 
     // Set default configuration
-    const canvasMin = Math.min(this.canvas.width, this.canvas.height);
     this.arcs = 1;
     this.arcWidth = 10;
     this.arcWidthDelta = 0.02;
     this.arcAnchor = "centre";
     this.tailDelay = 0.25;
     this.arcDelay = 0.1;
-    this.radius = Math.floor(canvasMin * 0.75);
+    const canvasMin = Math.min(
+      this.canvas.width,
+      this.canvas.height,
+      ops?.canvasHeight ?? Infinity,
+      ops?.canvasWidth ?? Infinity
+    );
+    this.radius = Math.floor(canvasMin * 0.4);
     this.radiusDelta = 0;
     this.rotations = 1;
     this.innerBorder = null;
@@ -194,9 +199,9 @@ export class Antiquum extends Animautomaton {
 
     // Set initial configuration
     if (ops) this.setConfig(ops);
-  }
 
-  // #region Methods
+    this.postConstructor();
+  }
 
   // Capture the parent version of overridden methods
   parentDraw = this.draw;

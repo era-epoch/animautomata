@@ -75,7 +75,7 @@ export class Sempiternal extends Animautomaton {
    */
   radiusPulse: HexPulse;
 
-  // #region Constructor
+  // #region Methods
 
   /**
    * Creates a new Sempiternal animautomaton.
@@ -105,9 +105,9 @@ export class Sempiternal extends Animautomaton {
 
     // Set initial configuration
     if (ops) this.setConfig(ops);
-  }
 
-  // #region Methods
+    this.postConstructor();
+  }
 
   // Capture the parent version of overridden methods
   parentDraw = this.draw;

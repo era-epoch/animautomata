@@ -129,7 +129,7 @@ export class Lemniscate extends Animautomaton {
    */
   arcWidthDelta: number;
 
-  // #region Constructor
+  // #region Methods
 
   /**
    * Creates a new Lemniscate animautomaton.
@@ -161,9 +161,9 @@ export class Lemniscate extends Animautomaton {
 
     // Set initial configuration
     if (ops) this.setConfig(ops);
-  }
 
-  // #region Methods
+    this.postConstructor();
+  }
 
   // Capture the parent version of overridden methods
   parentDraw = this.draw;

@@ -271,6 +271,13 @@ export abstract class Animautomaton {
   // #region Methods
 
   /**
+   * This function is called at the end of all child class constructors.
+   */
+  postConstructor = () => {
+    if (!this.paused) requestAnimationFrame(this.animate);
+  };
+
+  /**
    * Sets one or more configurable properties of this Animautomaton.
    *
    * @param ops An object containing one or more valid {AnimautomatonOps} properties.
