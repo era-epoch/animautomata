@@ -4,7 +4,7 @@ import {
   TimingFunction,
   Vector2,
 } from "./types";
-import { clamp, modulo, pseudoUUID } from "./utils";
+import { modulo, pseudoUUID } from "./utils";
 
 /**
  * Configurable properties able to be passed to *all* Animautomaton constructors.
@@ -30,7 +30,6 @@ export type AnimautomatonOps = {
   customTimingFunction: (offset?: number) => number;
   drawStyle: DrawStyle;
   rest: number;
-  mutationInterval: number;
 };
 
 /**
@@ -77,6 +76,13 @@ export abstract class Animautomaton {
    */
   currColour: string;
 
+  /**
+   * The canvas element this animation is being drawn on.
+   *
+   * Animations should have their own canvas with nothing else on it.
+   */
+  canvas: HTMLCanvasElement;
+
   // #region Configurable properties
 
   /**
@@ -108,13 +114,6 @@ export abstract class Animautomaton {
   lastMutationTimestamp: number;
 
   /**
-   * The canvas element this animation is being drawn on.
-   *
-   * Animations should have their own canvas with nothing else on it.
-   */
-  canvas: HTMLCanvasElement;
-
-  /**
    * The context2d from this animation's canvas.
    */
   context: CanvasRenderingContext2D;
@@ -125,15 +124,6 @@ export abstract class Animautomaton {
    * Default: {x: Math.floor(canvas.width / 2), y: Math.floor(canvas.height / 2)}
    */
   origin: Vector2;
-
-  /**
-   * This animation's mutate() method is called after this many iterations.
-   * e.g. If mutationInterval is 0.5, the mutate method will be called halfway through each loop,
-   * and again at the end of each loop.
-   *
-   * Default: Infinity (i.e. mutate() is never called)
-   */
-  mutationInterval: number;
 
   /**
    * Number of milliseconds this animation's loop will take. Lower = faster.
@@ -263,7 +253,6 @@ export abstract class Animautomaton {
     this.timingFunction = "sinusoidal";
     this.customTimingFunction = this.getProgressLinear;
     this.drawStyle = "fill";
-    this.mutationInterval = Infinity;
 
     // Initial configuration from {ops} will be set in child class constructor.
   }
@@ -299,7 +288,6 @@ export abstract class Animautomaton {
     this.customTimingFunction =
       ops.customTimingFunction ?? this.customTimingFunction;
     this.drawStyle = ops.drawStyle ?? this.drawStyle;
-    this.mutationInterval = ops.mutationInterval ?? this.mutationInterval;
     this.canvas.width = ops.canvasWidth ?? this.canvas.width;
     this.canvas.height = ops.canvasHeight ?? this.canvas.height;
 
@@ -339,11 +327,7 @@ export abstract class Animautomaton {
     const msPerFrame = 1000 / this.fps;
     const progressPerFrame = msPerFrame / this.cycleDuration_ms;
     this.lastProgress = this.currProgress;
-    this.currProgress = clamp(
-      0,
-      this.currProgress + frames * progressPerFrame,
-      1
-    );
+    this.currProgress = (1 + this.currProgress + frames * progressPerFrame) % 1;
     if (this.lastProgress === 1) this.currProgress = 0;
     this.draw();
   };
@@ -367,13 +351,6 @@ export abstract class Animautomaton {
       return;
     }
 
-    // Check time delta since last mutation
-    const mutationDelta = now - this.lastMutationTimestamp;
-    if (mutationDelta >= this.mutationInterval) {
-      this.mutate();
-      this.lastMutationTimestamp = now;
-    }
-
     // If time elapsed since last call exceeds target ms/f, re-render
     this.lastProgress = this.currProgress;
     this.currProgress =
@@ -388,13 +365,6 @@ export abstract class Animautomaton {
     this.draw();
     this.lastDraw = now;
   };
-
-  /**
-   * This function is called every {mutationInterval} * {cycleDuration_ms} milliseconds.
-   * Used for mutating the animation over time (e.g. between loops).
-   * @abstract
-   */
-  mutate = () => {};
 
   /**
    * @param offset An amount to either add or subtract from the base progress before transformation.
@@ -448,6 +418,7 @@ export abstract class Animautomaton {
    * Starts or resumes new rendering calls.
    */
   play = () => {
+    if (!this.paused) return;
     this.paused = false;
     const now = performance.now();
     this.lastDraw = now;
@@ -459,6 +430,7 @@ export abstract class Animautomaton {
    * Prevents new rendering calls.
    */
   pause = () => {
+    if (this.paused) return;
     this.paused = true;
     this.pauseTimestamp = performance.now();
   };
