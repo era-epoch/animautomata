@@ -1,0 +1,49 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Dosis", sans-serif;
+  --white: #ffffff;
+  --black: #000000;
+  --offset: #ababab;
+  --background: #f5f5f5;
+  background-color: var(--background);
+}
+
+.animations {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  row-gap: 1rem;
+  width: 100vw;
+  padding: 1rem;
+}
+
+.animation-example {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 250px;
+  border-radius: 4px;
+  --el-border: 1px solid var(--offset);
+  border: var(--el-border);
+  h1 {
+    width: 100%;
+    margin: 0;
+    border-bottom: var(--el-border);
+    padding: 0.5rem 1rem;
+    font-weight: normal;
+    font-size: 1.5rem;
+  }
+}
+
+canvas {
+  width: fit-content;
+  height: fit-content;
+  background-color: var(--white);
+  overflow: hidden;
+  z-index: -1;
+}

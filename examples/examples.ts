@@ -1,4 +1,4 @@
-import { Antiquum, Lemniscate, Sempiternal } from "../../src";
+import { Antiquum, Lemniscate, Sempiternal } from "../src";
 
 const antiquum = new Antiquum("antiquum-canvas");
 
