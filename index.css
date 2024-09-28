@@ -1,0 +1,23 @@
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 75vh;
+  font-family: "Dosis", sans-serif;
+  gap: 0.5rem;
+}
+
+h1 {
+  margin: 0;
+}
+
+a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  span {
+    min-width: 0.5rem;
+  }
+}
