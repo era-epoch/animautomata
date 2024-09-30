@@ -1,7 +1,18 @@
-test("Abstract Animautomaton parent class should not be initializable", () => {
+import { initDocument } from "../test_helpers";
+
+test("empty constructor throws error", () => {
   const initializer = () => {
     // @ts-expect-error
-    const a = new Animautomaton();
+    new Animautomaton();
+  };
+  expect(initializer).toThrow(Error);
+});
+
+test("abstract Animautomaton parent class should not be initializable", () => {
+  initDocument();
+  const initializer = () => {
+    // @ts-expect-error
+    new Animautomaton("canvas");
   };
   expect(initializer).toThrow(Error);
 });

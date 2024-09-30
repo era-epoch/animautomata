@@ -40,7 +40,7 @@ type Positions = {
 };
 
 /**
- * An animautomaton based off of the traditional rotating/spinning arc loader.
+ * An animautomaton based on the traditional rotating/spinning arc loader.
  */
 export class Antiquum extends Animautomaton {
   // #region Configurable properties

@@ -83,6 +83,11 @@ export abstract class Animautomaton {
    */
   canvas: HTMLCanvasElement;
 
+  /**
+   * The context2d from this animation's canvas.
+   */
+  context: CanvasRenderingContext2D;
+
   // #region Configurable properties
 
   /**
@@ -112,11 +117,6 @@ export abstract class Animautomaton {
    * Default: 0
    */
   lastMutationTimestamp: number;
-
-  /**
-   * The context2d from this animation's canvas.
-   */
-  context: CanvasRenderingContext2D;
 
   /**
    * The (x,y) value of the geometric centre of the canvas.
