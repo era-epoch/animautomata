@@ -43,36 +43,49 @@ export abstract class Animautomaton {
    * A uuid for this object. Generated with crypto.randomUUID().
    *
    * Falls back to pseudoUUID() which uses Math.random() if not running in a secure context.
+   * @private
    */
   id: string;
 
   /**
+   * # of times this.postConstructor has been called. For testing only.
+   * @private
+   */
+  postConstructorCalls: number;
+
+  /**
    * High resolution timestamp (ms) of when this animation was created.
+   * @private
    */
   start: number;
 
   /**
    * High resolution timestamp (ms) of when this animation was last rendered.
+   * @private
    */
   lastDraw: number;
 
   /**
    * True iff this animation is currently paused.
+   * @private
    */
   paused: boolean;
 
   /**
    * High resolution timestamp (ms) of when this animation was last paused.
+   * @private
    */
   pauseTimestamp: number;
 
   /**
    * Number of milliseconds this animation has spent paused in total.
+   * @private
    */
   pauseDuration: number;
 
   /**
    * Keeps track of the current colour value during a draw call
+   * @private
    */
   currColour: string;
 
@@ -80,13 +93,21 @@ export abstract class Animautomaton {
    * The canvas element this animation is being drawn on.
    *
    * Animations should have their own canvas with nothing else on it.
+   * @private
    */
   canvas: HTMLCanvasElement;
 
   /**
    * The context2d from this animation's canvas.
+   * @private
    */
   context: CanvasRenderingContext2D;
+
+  /**
+   * The current frame of the animation.
+   * @private
+   */
+  frame: number;
 
   // #region Configurable properties
 
@@ -221,6 +242,7 @@ export abstract class Animautomaton {
     } else {
       this.id = pseudoUUID();
     }
+    this.postConstructorCalls = 0;
     this.start = performance.now();
     this.lastDraw = this.start;
     this.lastMutationTimestamp = this.start;
@@ -238,6 +260,7 @@ export abstract class Animautomaton {
     this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
 
     // Set default configuration
+    this.frame = 0;
     this.backgroundColour = null;
     this.currProgress = 0;
     this.lastProgress = 0;
@@ -260,9 +283,10 @@ export abstract class Animautomaton {
   // #region Methods
 
   /**
-   * This function is called at the end of all child class constructors.
+   * This function must be called at the end of all child class constructors.
    */
   postConstructor = () => {
+    this.postConstructorCalls++;
     if (!this.paused) requestAnimationFrame(this.animate);
   };
 
@@ -304,6 +328,11 @@ export abstract class Animautomaton {
   draw = () => {
     // Clear previous render
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Record current frame number
+    const msPerFrame = 1000 / this.fps;
+    const progressPerFrame = msPerFrame / this.cycleDuration_ms;
+    this.frame = Math.floor(this.currProgress / progressPerFrame);
 
     // Paint background colour, if present
     if (this.backgroundColour != null) {
