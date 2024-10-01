@@ -1,4 +1,4 @@
-import { initDocument } from "../../test_helpers";
+import { initDocument } from "../../testing";
 import { Lemniscate, LemniscateOps } from "../lemniscate";
 
 const properties = [

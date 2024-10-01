@@ -1,4 +1,4 @@
-import { initDocument } from "../../test_helpers";
+import { initDocument } from "../../testing";
 import { Sempiternal, SempiternalOps } from "../sempiternal";
 
 const properties = [

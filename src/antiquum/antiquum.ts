@@ -1,6 +1,6 @@
 import { Animautomaton, AnimautomatonOps } from "../animautomaton";
 import { Anchor, ArcEndPoint, Border, Linecap, Vector2 } from "../types";
-import { modulo } from "../utils";
+import { modulo } from "../util";
 
 /**
  * Configurable properties able to be passed to the Antiquum constructor.

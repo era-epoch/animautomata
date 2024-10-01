@@ -2,7 +2,7 @@ import { AnimautomatonOps } from "../animautomaton";
 import { Antiquum } from "../antiquum/antiquum";
 import { Lemniscate } from "../lemniscate/lemniscate";
 import { Sempiternal } from "../sempiternal/sempiternal";
-import { initDocument } from "../test_helpers";
+import { initDocument } from "../testing";
 
 const commonProperties = [
   "id",

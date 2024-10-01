@@ -4,7 +4,7 @@ import {
   TimingFunction,
   Vector2,
 } from "./types";
-import { modulo, pseudoUUID } from "./utils";
+import { modulo, pseudoUUID } from "./util";
 
 /**
  * Configurable properties able to be passed to *all* Animautomaton constructors.

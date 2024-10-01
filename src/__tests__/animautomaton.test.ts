@@ -1,4 +1,4 @@
-import { initDocument } from "../test_helpers";
+import { initDocument } from "../testing";
 
 test("empty constructor throws error", () => {
   const initializer = () => {
