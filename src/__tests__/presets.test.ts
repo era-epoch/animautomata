@@ -71,6 +71,8 @@ const fullAnimautomatonOps: Partial<AnimautomatonOps> = {
   drawStyle: "stroke",
 };
 
+// TODO: ensure defaults are as-expected too
+
 for (const PresetClass of [Antiquum, Sempiternal, Lemniscate]) {
   test("empty constructor throws error", () => {
     const initializer = () => {
