@@ -147,7 +147,13 @@ export class Lemniscate extends Animautomaton {
     this.arcWidthDelta = 0;
     this.tailDelay = 0.2;
     this.arcDelay = 0.1;
-    this.radius = this.canvas.width / 8;
+    const canvasMin = Math.min(
+      this.canvas.width,
+      this.canvas.height,
+      ops?.canvasHeight ?? Infinity,
+      ops?.canvasWidth ?? Infinity
+    );
+    this.radius = canvasMin / 8;
     this.radiusDelta = 0;
     this.xOff = this.radius * 2;
     this.geometries = [];
@@ -693,7 +699,6 @@ export class Lemniscate extends Animautomaton {
         this.draw_SE_Line(order, points, arc_i);
         break;
       default:
-        console.error("Tried to draw invalid section number: " + section);
         break;
     }
   };

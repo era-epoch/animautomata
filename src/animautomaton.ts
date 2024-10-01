@@ -252,6 +252,7 @@ export abstract class Animautomaton {
     if (this.canvas === null) {
       throw new Error("Canvas element not found with id: " + canvasId);
     }
+    this.canvas.setAttribute("data-animautomata-id", this.id);
     this.origin = {
       x: Math.floor(this.canvas.width / 2),
       y: Math.floor(this.canvas.height / 2),
@@ -334,6 +335,9 @@ export abstract class Animautomaton {
     const progressPerFrame = msPerFrame / this.cycleDuration_ms;
     this.frame = Math.floor(this.currProgress / progressPerFrame);
 
+    // Record this as most recent draw time
+    this.lastDraw = performance.now();
+
     // Paint background colour, if present
     if (this.backgroundColour != null) {
       this.context.fillStyle = this.backgroundColour;
@@ -392,7 +396,6 @@ export abstract class Animautomaton {
       }
     }
     this.draw();
-    this.lastDraw = now;
   };
 
   /**

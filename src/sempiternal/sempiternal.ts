@@ -94,7 +94,13 @@ export class Sempiternal extends Animautomaton {
       intensity: 1,
     };
     this.sideLength = 3;
-    this.circleSize = this.canvas.width / 8;
+    const canvasMin = Math.min(
+      this.canvas.width,
+      this.canvas.height,
+      ops?.canvasHeight ?? Infinity,
+      ops?.canvasWidth ?? Infinity
+    );
+    this.circleSize = canvasMin / 8;
     this.relativeExpansion = 1;
     this.delay = 0.1;
     this.alternateSpin = false;
