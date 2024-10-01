@@ -266,10 +266,12 @@ export class Lemniscate extends Animautomaton {
    * Draws the ith arc.
    */
   drawArc = (arc_i: number) => {
-    const leadProgress = this.getProgress(this.arcDelay * arc_i);
-    const tailProgress = this.getProgress(
-      this.arcDelay * arc_i - this.tailDelay
-    );
+    let leadProgress = this.getProgress(this.arcDelay * arc_i);
+    let tailProgress = this.getProgress(this.arcDelay * arc_i - this.tailDelay);
+
+    // These lines prevent some weird behaviour at the 0 point (bandaid solution)
+    if (leadProgress == 1 || leadProgress == 0) leadProgress = 0.0001;
+    if (tailProgress == 1 || tailProgress == 0) tailProgress = 0.0001;
 
     this.ctxSetColour(this.arcs - arc_i - 1);
 

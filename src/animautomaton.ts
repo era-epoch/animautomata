@@ -350,7 +350,7 @@ export abstract class Animautomaton {
 
   /**
    * Moves the animation immediately a certain number of frames.
-   * @param frames Number of frames to seek (negative = rewind)
+   * @param frames Number of frames to seek (negative = rewind, 0 = re-render current frame)
    */
   seek = (frames: number) => {
     const msPerFrame = 1000 / this.fps;
