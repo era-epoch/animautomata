@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "test": "jest",
-    "build": "vite build",
+    "build": "vite build && vite build --mode examples",
     "build-examples": "vite build --mode examples",
     "preview": "vite preview",
     "docs": "typedoc src/index.ts --plugin typedoc-material-theme --themeColor '#c70039' --out public/docs"

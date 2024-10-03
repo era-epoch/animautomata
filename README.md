@@ -37,11 +37,11 @@ via npm
 
 via unpkg cdn
 
-`<script src="https://unpkg.com/animautomata@latest/dist/animautomata.min.js></script>`
+`<script src="https://unpkg.com/animautomata@latest/dist/min.js></script>`
 
 via jsdeliver cdn
 
-`<script src="https://cdn.jsdelivr.net/npm/animautomata@latest/dist/animautomata.min.js"></script>`
+`<script src="https://cdn.jsdelivr.net/npm/animautomata@latest/dist/min.js"></script>`
 
 via git
 

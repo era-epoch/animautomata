@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => {
    */
   if (mode === "production") {
     return {
+      base: "/animautomata/",
       build: {
         target: "esnext",
         rollupOptions: {
@@ -20,6 +21,7 @@ export default defineConfig(({ mode }) => {
     };
   } else {
     return {
+      base: "/animautomata/",
       build: {
         emptyOutDir: false,
         target: "esnext",
