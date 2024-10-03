@@ -8,6 +8,7 @@
     "dev": "vite",
     "test": "jest",
     "build": "vite build",
+    "build-examples": "vite build --mode examples",
     "preview": "vite preview",
     "docs": "typedoc src/index.ts --plugin typedoc-material-theme --themeColor '#c70039' --out public/docs"
   },
@@ -17,8 +18,10 @@
   },
   "files": [
     "LICENSE",
-    "src/",
-    "README.md"
+    "src/[!_]*",
+    "src/[!_]**/[!_]*",
+    "README.md",
+    "dist/min.js"
   ],
   "keywords": [
     "animation",

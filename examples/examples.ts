@@ -1,6 +1,13 @@
-import { Antiquum, Lemniscate, Sempiternal } from "../../src";
+import {
+  Antiquum,
+  AntiquumOps,
+  Lemniscate,
+  LemniscateOps,
+  Sempiternal,
+  SempiternalOps,
+} from "../src";
 
-const createCanvas = (headerText) => {
+const createCanvas = (headerText: string) => {
   const container = document.getElementById("animations");
   const wrapper = document.createElement("div");
   wrapper.classList.add("animation-example");
@@ -16,34 +23,34 @@ const createCanvas = (headerText) => {
   return canvas.id;
 };
 
-const createAntiquum = (ops) => {
+const createAntiquum = (ops: Partial<AntiquumOps>) => {
   const anim = new Antiquum(createCanvas("antiquum"), ops);
   anim.seek(0);
   anim.pause();
   const canvas = document.querySelector(`[data-animautomata-id="${anim.id}"]`);
   if (canvas == null) return;
-  canvas.parentElement.addEventListener("mouseenter", () => anim.play());
-  canvas.parentElement.addEventListener("mouseleave", () => anim.pause());
+  canvas.parentElement!.addEventListener("mouseenter", () => anim.play());
+  canvas.parentElement!.addEventListener("mouseleave", () => anim.pause());
 };
 
-const createLemniscate = (ops) => {
+const createLemniscate = (ops: Partial<LemniscateOps>) => {
   const anim = new Lemniscate(createCanvas("lemniscate"), ops);
   anim.seek(0);
   anim.pause();
   const canvas = document.querySelector(`[data-animautomata-id="${anim.id}"]`);
   if (canvas == null) return;
-  canvas.parentElement.addEventListener("mouseenter", () => anim.play());
-  canvas.parentElement.addEventListener("mouseleave", () => anim.pause());
+  canvas.parentElement!.addEventListener("mouseenter", () => anim.play());
+  canvas.parentElement!.addEventListener("mouseleave", () => anim.pause());
 };
 
-const createSempiternal = (ops) => {
+const createSempiternal = (ops: Partial<SempiternalOps>) => {
   const anim = new Sempiternal(createCanvas("sempiternal"), ops);
   anim.seek(0);
   anim.pause();
   const canvas = document.querySelector(`[data-animautomata-id="${anim.id}"]`);
   if (canvas == null) return;
-  canvas.parentElement.addEventListener("mouseenter", () => anim.play());
-  canvas.parentElement.addEventListener("mouseleave", () => anim.pause());
+  canvas.parentElement!.addEventListener("mouseenter", () => anim.play());
+  canvas.parentElement!.addEventListener("mouseleave", () => anim.pause());
 };
 
 createAntiquum({ radius: 40 });
