@@ -1,6 +1,6 @@
 {
   "name": "animautomata",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "a library for creating high quality loading animations using the Canvas API",
   "main": "src/index.ts",
   "type": "module",
@@ -9,12 +9,17 @@
     "test": "jest",
     "build": "vite build",
     "preview": "vite preview",
-    "docs": "typedoc src/index.ts --plugin typedoc-material-theme --themeColor '#c70039'"
+    "docs": "typedoc src/index.ts --plugin typedoc-material-theme --themeColor '#c70039' --out public/docs"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/era-epoch/animautomata.git"
   },
+  "files": [
+    "LICENSE",
+    "src/",
+    "README.md"
+  ],
   "keywords": [
     "animation",
     "frontend",

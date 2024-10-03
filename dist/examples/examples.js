@@ -1,11 +1,4 @@
-import {
-  Antiquum,
-  AntiquumOps,
-  Lemniscate,
-  LemniscateOps,
-  Sempiternal,
-  SempiternalOps,
-} from "../src";
+import { Antiquum, Lemniscate, Sempiternal } from "../../src";
 
 const createCanvas = (headerText) => {
   const container = document.getElementById("animations");
@@ -23,46 +16,34 @@ const createCanvas = (headerText) => {
   return canvas.id;
 };
 
-const createAntiquum = (ops: Partial<AntiquumOps>) => {
+const createAntiquum = (ops) => {
   const anim = new Antiquum(createCanvas("antiquum"), ops);
-  const startFrame = Math.floor(Math.random() * 60);
   anim.seek(0);
-  // anim.seek(startFrame + 1);
   anim.pause();
-  const canvas = document.querySelector(
-    `[data-animautomata-id="${anim.id}"]`
-  ) as HTMLCanvasElement;
+  const canvas = document.querySelector(`[data-animautomata-id="${anim.id}"]`);
   if (canvas == null) return;
-  canvas.parentElement!.addEventListener("mouseenter", () => anim.play());
-  canvas.parentElement!.addEventListener("mouseleave", () => anim.pause());
+  canvas.parentElement.addEventListener("mouseenter", () => anim.play());
+  canvas.parentElement.addEventListener("mouseleave", () => anim.pause());
 };
 
-const createLemniscate = (ops: Partial<LemniscateOps>) => {
+const createLemniscate = (ops) => {
   const anim = new Lemniscate(createCanvas("lemniscate"), ops);
-  const startFrame = Math.floor(Math.random() * 60);
   anim.seek(0);
-  // anim.seek(startFrame + 1);
   anim.pause();
-  const canvas = document.querySelector(
-    `[data-animautomata-id="${anim.id}"]`
-  ) as HTMLCanvasElement;
+  const canvas = document.querySelector(`[data-animautomata-id="${anim.id}"]`);
   if (canvas == null) return;
-  canvas.parentElement!.addEventListener("mouseenter", () => anim.play());
-  canvas.parentElement!.addEventListener("mouseleave", () => anim.pause());
+  canvas.parentElement.addEventListener("mouseenter", () => anim.play());
+  canvas.parentElement.addEventListener("mouseleave", () => anim.pause());
 };
 
-const createSempiternal = (ops: Partial<SempiternalOps>) => {
+const createSempiternal = (ops) => {
   const anim = new Sempiternal(createCanvas("sempiternal"), ops);
-  const startFrame = Math.floor(Math.random() * 60);
   anim.seek(0);
-  // anim.seek(startFrame + 1);
   anim.pause();
-  const canvas = document.querySelector(
-    `[data-animautomata-id="${anim.id}"]`
-  ) as HTMLCanvasElement;
+  const canvas = document.querySelector(`[data-animautomata-id="${anim.id}"]`);
   if (canvas == null) return;
-  canvas.parentElement!.addEventListener("mouseenter", () => anim.play());
-  canvas.parentElement!.addEventListener("mouseleave", () => anim.pause());
+  canvas.parentElement.addEventListener("mouseenter", () => anim.play());
+  canvas.parentElement.addEventListener("mouseleave", () => anim.pause());
 };
 
 createAntiquum({ radius: 40 });
