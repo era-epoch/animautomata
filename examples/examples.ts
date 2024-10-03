@@ -25,7 +25,9 @@ const createCanvas = (headerText) => {
 
 const createAntiquum = (ops: Partial<AntiquumOps>) => {
   const anim = new Antiquum(createCanvas("antiquum"), ops);
-  anim.seek(Math.floor(Math.random() * 60));
+  const startFrame = Math.floor(Math.random() * 60);
+  anim.seek(0);
+  // anim.seek(startFrame + 1);
   anim.pause();
   const canvas = document.querySelector(
     `[data-animautomata-id="${anim.id}"]`
@@ -37,7 +39,9 @@ const createAntiquum = (ops: Partial<AntiquumOps>) => {
 
 const createLemniscate = (ops: Partial<LemniscateOps>) => {
   const anim = new Lemniscate(createCanvas("lemniscate"), ops);
-  anim.seek(Math.floor(Math.random() * 60));
+  const startFrame = Math.floor(Math.random() * 60);
+  anim.seek(0);
+  // anim.seek(startFrame + 1);
   anim.pause();
   const canvas = document.querySelector(
     `[data-animautomata-id="${anim.id}"]`
@@ -49,7 +53,9 @@ const createLemniscate = (ops: Partial<LemniscateOps>) => {
 
 const createSempiternal = (ops: Partial<SempiternalOps>) => {
   const anim = new Sempiternal(createCanvas("sempiternal"), ops);
-  anim.seek(Math.floor(Math.random() * 60));
+  const startFrame = Math.floor(Math.random() * 60);
+  anim.seek(0);
+  // anim.seek(startFrame + 1);
   anim.pause();
   const canvas = document.querySelector(
     `[data-animautomata-id="${anim.id}"]`
@@ -59,7 +65,7 @@ const createSempiternal = (ops: Partial<SempiternalOps>) => {
   canvas.parentElement!.addEventListener("mouseleave", () => anim.pause());
 };
 
-createAntiquum({});
+createAntiquum({ radius: 40 });
 
 createAntiquum({
   cycleDuration_ms: 1500,
