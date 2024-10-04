@@ -68,3 +68,12 @@ canvas {
   overflow: hidden;
   z-index: -1;
 }
+
+.source-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 1rem;
+  text-align: center;
+}

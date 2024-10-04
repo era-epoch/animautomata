@@ -1,7 +1,5 @@
 # Animautomata
 
-don't use this yet i'm still working on it
-
 ## Summary
 
 An open-source, zero-dependency, fully-typed solution for creating high-quality, lightweight loading animations that fit your brand identity, using the Canvas API.
@@ -28,6 +26,10 @@ An open-source, zero-dependency, fully-typed solution for creating high-quality,
 ## Example Usage
 
 <https://era-epoch.github.io/animautomata/examples/>
+
+with source code:
+
+<https://github.com/era-epoch/animautomata/blob/main/examples/examples.ts>
 
 ## Installation
 
