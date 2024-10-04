@@ -13,6 +13,12 @@ body {
   --primary: #c70039;
 }
 
+h1 {
+  color: var(--background);
+  padding: 0 2rem;
+  text-align: center;
+}
+
 background {
   position: fixed;
   top: 0;
@@ -23,7 +29,7 @@ background {
   background: linear-gradient(to bottom, #000000, #222222);
 }
 
-#animations {
+.animations {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -31,7 +37,6 @@ background {
   row-gap: 1rem;
   width: 100vw;
   padding: 1rem;
-  min-height: 100vh;
 }
 
 .animation-example {
@@ -41,7 +46,7 @@ background {
   width: fit-content;
   border-radius: 4px;
   height: fit-content;
-  --el-border: 2px solid var(--offset);
+  --el-border: 2px solid var(--white);
   border: var(--el-border);
   overflow: hidden;
   h1 {

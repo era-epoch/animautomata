@@ -7,17 +7,14 @@ import {
   SempiternalOps,
 } from "../src";
 
-const createCanvas = (headerText: string) => {
-  const container = document.getElementById("animations");
+const createCanvas = (preset: string) => {
+  const container = document.getElementById(preset + "-anims");
   const wrapper = document.createElement("div");
   wrapper.classList.add("animation-example");
-  const header = document.createElement("h1");
-  header.innerHTML = headerText;
   const canvas = document.createElement("canvas");
   canvas.width = 250;
   canvas.height = 250;
-  canvas.id = headerText + `-` + Math.floor(Math.random() * 100000);
-  wrapper.appendChild(header);
+  canvas.id = preset + `-` + Math.floor(Math.random() * 100000);
   wrapper.appendChild(canvas);
   container?.appendChild(wrapper);
   return canvas.id;
