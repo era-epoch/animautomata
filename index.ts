@@ -1,12 +1,10 @@
 import { Antiquum, Lemniscate, Sempiternal } from "./src";
 
-try {
-  new Antiquum("");
-  new Lemniscate("");
-  new Sempiternal("");
-} catch (e) {
-  console.log("If you know a better way to not do this please let me know");
-}
-
-// Not sure this is the best way to get vite to actually output the source code to ./dist
-// But it works?
+// Not sure if this is the ideal way to do this?
+console.log("Loading animautomata library.");
+// @ts-expect-error
+window.Antiquum = Antiquum;
+// @ts-expect-error
+window.Lemniscate = Lemniscate;
+// @ts-expect-error
+window.Sempiternal = Sempiternal;

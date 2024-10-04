@@ -39,7 +39,7 @@ via npm
 
 via unpkg cdn
 
-`<script src="https://unpkg.com/animautomata@latest/dist/min.js></script>`
+`<script src="https://unpkg.com/animautomata@latest/dist/min.js"></script>`
 
 via jsdeliver cdn
 
