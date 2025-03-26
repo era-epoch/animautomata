@@ -1,4 +1,5 @@
 import { Animautomaton, AnimautomatonOps } from "../animautomaton";
+import { Vector2 } from "../types";
 
 /**
  * Configurable properties able to be passed to the constructor.
@@ -56,12 +57,15 @@ export class Tiling extends Animautomaton {
 
     // Set default configuration
     this.lineWeight = 1;
-    this.shape = "hex";
-    this.size = 1;
-    this.padding = 1;
+    this.shape = "square";
+    this.size = 50;
+    this.padding = 10;
+    this.drawStyle = "stroke";
 
     // Set initial configuration
     if (ops) this.setConfig(ops);
+
+    this.postConstructor();
   }
 
   // Capture the parent version of overridden methods before override
@@ -75,6 +79,7 @@ export class Tiling extends Animautomaton {
    */
   setConfig = (ops: Partial<TilingOps>) => {
     this.lineWeight = ops.lineWeight ?? this.lineWeight;
+    this.context.lineWidth = this.lineWeight;
     this.shape = ops.shape ?? this.shape;
     this.size = ops.size ?? this.size;
     this.padding = ops.padding ?? this.padding;
@@ -89,5 +94,55 @@ export class Tiling extends Animautomaton {
   draw = () => {
     // Eq. to super.draw()
     this.parentDraw();
+    const progress = this.getProgress();
+    const cols = Math.ceil(this.canvas.width / (this.size + this.padding));
+    for (let col = -Math.ceil(cols / 2); col <= Math.ceil(cols / 2); col++) {
+      let offset = 0;
+      let colOffset = col * (this.size + this.padding);
+      while (
+        offset <
+        Math.ceil(this.canvas.height / 2) + this.size + this.padding
+      ) {
+        this.drawShape({ x: colOffset, y: 0 + offset }, progress);
+        if (offset != 0) {
+          this.drawShape({ x: colOffset, y: 0 - offset }, progress);
+        }
+        offset += this.size + this.padding;
+      }
+    }
+  };
+
+  drawShape = (position: Vector2, progress: number) => {
+    if (this.shape == "hex") this.drawHex(position, progress);
+    else if (this.shape == "tri") this.drawTri(position, progress);
+    else if (this.shape == "square") this.drawSquare(position, progress);
+    else throw new Error("Invalid Tiling shape: " + this.shape);
+  };
+
+  drawHex = (position: Vector2, progress: number) => {};
+  drawTri = (position: Vector2, progress: number) => {};
+  drawSquare = (position: Vector2, progress: number) => {
+    this.context.beginPath();
+    this.context.moveTo(
+      this.origin.x + position.x + this.size / 2,
+      this.origin.y + position.y - this.size / 2
+    );
+    this.context.lineTo(
+      this.origin.x + position.x + this.size / 2,
+      this.origin.y + position.y + this.size / 2
+    );
+    this.context.lineTo(
+      this.origin.x + position.x - this.size / 2,
+      this.origin.y + position.y + this.size / 2
+    );
+    this.context.lineTo(
+      this.origin.x + position.x - this.size / 2,
+      this.origin.y + position.y - this.size / 2
+    );
+    this.context.lineTo(
+      this.origin.x + position.x + this.size / 2,
+      this.origin.y + position.y - this.size / 2
+    );
+    this.ctxDraw();
   };
 }
