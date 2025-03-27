@@ -1,5 +1,6 @@
 import { Animautomaton, AnimautomatonOps } from "../animautomaton";
 import { Vector2 } from "../types";
+import { isEven, modulo } from "../util";
 
 /**
  * Configurable properties able to be passed to the constructor.
@@ -56,11 +57,11 @@ export class Tiling extends Animautomaton {
     super(canvasId);
 
     // Set default configuration
-    this.lineWeight = 1;
-    this.shape = "square";
-    this.size = 50;
-    this.padding = 10;
-    this.drawStyle = "stroke";
+    this.lineWeight = 3;
+    this.shape = "hex";
+    this.size = 70;
+    this.padding = 5;
+    this.drawStyle = "fill";
 
     // Set initial configuration
     if (ops) this.setConfig(ops);
@@ -95,32 +96,133 @@ export class Tiling extends Animautomaton {
     // Eq. to super.draw()
     this.parentDraw();
     const progress = this.getProgress();
-    const cols = Math.ceil(this.canvas.width / (this.size + this.padding));
+    let shapeOffset = this.size + this.padding;
+    let cols =
+      this.shape == "square"
+        ? Math.ceil(this.canvas.width / shapeOffset)
+        : this.shape == "tri"
+        ? Math.ceil(this.canvas.width / (shapeOffset / Math.sqrt(2.5)))
+        : Math.ceil(this.canvas.width / (shapeOffset / Math.sqrt(2.5)));
     for (let col = -Math.ceil(cols / 2); col <= Math.ceil(cols / 2); col++) {
       let offset = 0;
-      let colOffset = col * (this.size + this.padding);
-      while (
-        offset <
-        Math.ceil(this.canvas.height / 2) + this.size + this.padding
-      ) {
-        this.drawShape({ x: colOffset, y: 0 + offset }, progress);
+      let colOffset =
+        this.shape == "square"
+          ? col * shapeOffset
+          : this.shape == "tri"
+          ? col * (shapeOffset / Math.sqrt(2.5))
+          : col * (shapeOffset / 1.3);
+      let orientation = modulo(col, 2) == 0;
+      while (offset < Math.ceil(this.canvas.height / 2) + shapeOffset) {
+        this.drawShape(
+          { x: colOffset, y: 0 + offset },
+          progress,
+          orientation,
+          col
+        );
         if (offset != 0) {
-          this.drawShape({ x: colOffset, y: 0 - offset }, progress);
+          this.drawShape(
+            { x: colOffset, y: 0 - offset },
+            progress,
+            orientation,
+            col
+          );
         }
-        offset += this.size + this.padding;
+        offset += shapeOffset;
+        orientation = !orientation;
       }
     }
   };
 
-  drawShape = (position: Vector2, progress: number) => {
-    if (this.shape == "hex") this.drawHex(position, progress);
-    else if (this.shape == "tri") this.drawTri(position, progress);
+  drawShape = (
+    position: Vector2,
+    progress: number,
+    orientation: boolean,
+    col: number
+  ) => {
+    if (this.shape == "hex") this.drawHex(position, progress, col);
+    else if (this.shape == "tri") this.drawTri(position, progress, orientation);
     else if (this.shape == "square") this.drawSquare(position, progress);
     else throw new Error("Invalid Tiling shape: " + this.shape);
   };
 
-  drawHex = (position: Vector2, progress: number) => {};
-  drawTri = (position: Vector2, progress: number) => {};
+  drawHex = (position: Vector2, progress: number, col: number) => {
+    const a = this.size;
+    const r = a / 2;
+    if (isEven(col)) position.y = position.y + r + this.padding / 2;
+    this.context.beginPath();
+    this.context.moveTo(
+      this.origin.x + position.x + r / 2,
+      this.origin.y + position.y - r
+    );
+    this.context.lineTo(
+      this.origin.x + position.x + r,
+      this.origin.y + position.y
+    );
+    this.context.lineTo(
+      this.origin.x + position.x + r / 2,
+      this.origin.y + position.y + r
+    );
+    this.context.lineTo(
+      this.origin.x + position.x - r / 2,
+      this.origin.y + position.y + r
+    );
+    this.context.lineTo(
+      this.origin.x + position.x - r,
+      this.origin.y + position.y
+    );
+    this.context.lineTo(
+      this.origin.x + position.x - r / 2,
+      this.origin.y + position.y - r
+    );
+    this.context.lineTo(
+      this.origin.x + position.x + r / 2,
+      this.origin.y + position.y - r
+    );
+    this.ctxDraw();
+  };
+  drawTri = (position: Vector2, progress: number, orientation: boolean) => {
+    const a = this.size;
+    const h = (a * Math.sqrt(3)) / 5.5;
+    const r = a / Math.sqrt(3);
+    this.context.beginPath();
+    if (orientation) {
+      this.context.moveTo(
+        this.origin.x + position.x,
+        this.origin.y + position.y - r
+      );
+      this.context.lineTo(
+        this.origin.x + position.x + a / 2,
+        this.origin.y + position.y + h
+      );
+      this.context.lineTo(
+        this.origin.x + position.x - a / 2,
+        this.origin.y + position.y + h
+      );
+      this.context.lineTo(
+        this.origin.x + position.x,
+        this.origin.y + position.y - r
+      );
+    } else {
+      const offset = r / 2;
+      this.context.moveTo(
+        this.origin.x + position.x,
+        this.origin.y + position.y - offset + r
+      );
+      this.context.lineTo(
+        this.origin.x + position.x - a / 2,
+        this.origin.y + position.y - offset - h
+      );
+      this.context.lineTo(
+        this.origin.x + position.x + a / 2,
+        this.origin.y + position.y - offset - h
+      );
+      this.context.lineTo(
+        this.origin.x + position.x,
+        this.origin.y + position.y - offset + r
+      );
+    }
+    this.ctxDraw();
+  };
   drawSquare = (position: Vector2, progress: number) => {
     this.context.beginPath();
     this.context.moveTo(
