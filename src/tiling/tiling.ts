@@ -1,6 +1,6 @@
 import { Animautomaton, AnimautomatonOps } from "../animautomaton";
 import { Vector2 } from "../types";
-import { isEven, modulo } from "../util";
+import { isEven } from "../util";
 
 /**
  * Configurable properties able to be passed to the constructor.
@@ -14,9 +14,12 @@ export type TilingOps = AnimautomatonOps & {
   shape: TilingShape;
   size: number;
   padding: number;
+  pulseDirection: Direction;
 };
 
 export type TilingShape = "square" | "tri" | "hex";
+
+export type Direction = "N" | "NE" | "E" | "SE" | "S" | "SW" | "W" | "NW";
 
 /**
  * An animated planar tiling.
@@ -44,6 +47,8 @@ export class Tiling extends Animautomaton {
    */
   padding: number;
 
+  pulseDirection: Direction;
+
   // #region Methods
 
   /**
@@ -57,16 +62,18 @@ export class Tiling extends Animautomaton {
     super(canvasId);
 
     // Set default configuration
-    this.lineWeight = 3;
+    this.lineWeight = 1;
     this.shape = "hex";
     this.size = 70;
-    this.padding = 5;
+    this.padding = 0;
     this.drawStyle = "fill";
+    this.pulseDirection = "S";
 
     // Set initial configuration
     if (ops) this.setConfig(ops);
 
     this.postConstructor();
+    console.log(this);
   }
 
   // Capture the parent version of overridden methods before override
@@ -79,76 +86,170 @@ export class Tiling extends Animautomaton {
    * @param ops An object containing one or more valid {TilingOps} properties.
    */
   setConfig = (ops: Partial<TilingOps>) => {
+    this.parentSetConfig(ops);
     this.lineWeight = ops.lineWeight ?? this.lineWeight;
     this.context.lineWidth = this.lineWeight;
     this.shape = ops.shape ?? this.shape;
     this.size = ops.size ?? this.size;
     this.padding = ops.padding ?? this.padding;
+    this.pulseDirection = ops.pulseDirection ?? this.pulseDirection;
   };
 
   /**
    * Uses this.context to draw the current frame of the animation, as determined by
-   * the current configuration and this.currProgress.
+   * the current configuration and progress.
    *
    * Called by this.animate().
    */
   draw = () => {
-    // Eq. to super.draw()
-    this.parentDraw();
+    this.parentDraw(); // eqv. to super.draw()
     const progress = this.getProgress();
-    let shapeOffset = this.size + this.padding;
-    let cols =
-      this.shape == "square"
-        ? Math.ceil(this.canvas.width / shapeOffset)
-        : this.shape == "tri"
-        ? Math.ceil(this.canvas.width / (shapeOffset / Math.sqrt(2.5)))
-        : Math.ceil(this.canvas.width / (shapeOffset / Math.sqrt(2.5)));
-    for (let col = -Math.ceil(cols / 2); col <= Math.ceil(cols / 2); col++) {
-      let offset = 0;
-      let colOffset =
-        this.shape == "square"
-          ? col * shapeOffset
-          : this.shape == "tri"
-          ? col * (shapeOffset / Math.sqrt(2.5))
-          : col * (shapeOffset / 1.3);
-      let orientation = modulo(col, 2) == 0;
-      while (offset < Math.ceil(this.canvas.height / 2) + shapeOffset) {
-        this.drawShape(
-          { x: colOffset, y: 0 + offset },
-          progress,
-          orientation,
-          col
-        );
-        if (offset != 0) {
-          this.drawShape(
-            { x: colOffset, y: 0 - offset },
-            progress,
-            orientation,
-            col
-          );
-        }
-        offset += shapeOffset;
-        orientation = !orientation;
-      }
-    }
+    this.drawShapes(progress);
   };
 
-  drawShape = (
-    position: Vector2,
-    progress: number,
-    orientation: boolean,
-    col: number
-  ) => {
-    if (this.shape == "hex") this.drawHex(position, progress, col);
-    else if (this.shape == "tri") this.drawTri(position, progress, orientation);
-    else if (this.shape == "square") this.drawSquare(position, progress);
+  drawShapes = (progress: number) => {
+    if (this.shape == "square") this.drawSquares(progress);
+    else if (this.shape == "tri") this.drawTris(progress);
+    else if (this.shape == "hex") this.drawHexes(progress);
     else throw new Error("Invalid Tiling shape: " + this.shape);
   };
 
-  drawHex = (position: Vector2, progress: number, col: number) => {
+  drawSquares = (progress: number) => {
+    const positions = this.getSquarePositions(progress);
+    positions.forEach((position) => this.drawSquare(position, progress));
+  };
+
+  drawTris = (progress: number) => {
+    const positions = this.getTriPositions(progress);
+    positions.forEach((position) =>
+      this.drawTri(position, progress, position.dir)
+    );
+  };
+
+  drawHexes = (progress: number) => {
+    const positions = this.getHexPositions(progress);
+    positions.forEach((position) => this.drawHex(position, progress));
+  };
+
+  getHexPositions = (progress: number) => {
+    type HexPos = Vector2 & { col: number; row: number };
+    const positions: HexPos[] = [];
+    const shapeSize = this.size + this.padding;
+    const cutoff = this.canvas.width / 2;
+    let xOff = 0;
+    let col = 0;
+    while (xOff <= cutoff) {
+      let yOff = 0;
+      let row = 0;
+      while (yOff <= cutoff) {
+        positions.push({ x: xOff, y: yOff, col, row });
+        if (xOff != 0) {
+          positions.push({ x: -xOff, y: yOff, col: -col, row });
+        }
+        if (yOff != 0) {
+          positions.push({ x: xOff, y: -yOff, col, row: -row });
+          if (xOff != 0) {
+            positions.push({ x: -xOff, y: -yOff, col: -col, row: -row });
+          }
+        }
+        row++;
+        yOff += shapeSize;
+      }
+      col++;
+      xOff += shapeSize * (3 / 4);
+    }
+    return positions;
+  };
+
+  getTriPositions = (progress: number) => {
+    type TriPos = Vector2 & { dir: "up" | "down" };
+    const positions: TriPos[] = [];
     const a = this.size;
-    const r = a / 2;
-    if (isEven(col)) position.y = position.y + r + this.padding / 2;
+    const shapeSize = a + this.padding / 2;
+    const h = Math.sqrt(Math.pow(a, 2) - Math.pow(a / 2, 2));
+    const cutoff = this.canvas.width / 2;
+    let xOff = 0;
+    let dir: "up" | "down" = "up";
+    while (xOff <= cutoff) {
+      let yOff = 0;
+      while (yOff <= cutoff) {
+        positions.push({ x: xOff, y: yOff, dir: dir });
+        if (xOff != 0) {
+          positions.push({ x: -xOff, y: yOff, dir: dir });
+        }
+        if (yOff != 0) {
+          positions.push({ x: xOff, y: -yOff, dir: dir });
+          if (xOff != 0) {
+            positions.push({ x: -xOff, y: -yOff, dir: dir });
+          }
+        }
+        yOff += h + this.padding / 2;
+        dir = dir == "up" ? "down" : "up";
+      }
+      xOff += shapeSize / 2 + this.padding / 2;
+    }
+    return positions;
+  };
+
+  getSquarePositions = (progress: number) => {
+    const positions: Vector2[] = [];
+    const shapeSize = this.size + this.padding;
+    const cutoff = this.canvas.width / 2;
+    let xOff = 0;
+    while (xOff <= cutoff) {
+      let yOff = 0;
+      while (yOff <= cutoff) {
+        positions.push({ x: xOff, y: yOff });
+        if (xOff != 0) {
+          positions.push({ x: -xOff, y: yOff });
+        }
+        if (yOff != 0) {
+          positions.push({ x: xOff, y: -yOff });
+          if (xOff != 0) {
+            positions.push({ x: -xOff, y: -yOff });
+          }
+        }
+        yOff += shapeSize;
+      }
+      xOff += shapeSize;
+    }
+    return positions;
+  };
+
+  drawHex = (
+    position: Vector2 & { col: number; row: number },
+    progress: number
+  ) => {
+    let a = this.size;
+    let r = a / 2;
+    if (isEven(position.col)) position.y = position.y + r + this.padding / 2;
+
+    const progress_x = ["E", "NE", "SE"].includes(this.pulseDirection)
+      ? 1 - progress
+      : progress;
+    const progress_y = ["S", "SW", "SE"].includes(this.pulseDirection)
+      ? 1 - progress
+      : progress;
+
+    let normalized_x =
+      (this.origin.x + position.x + progress_x * this.canvas.width * 2) /
+      this.canvas.width;
+    if (normalized_x > 1) normalized_x = 2 - normalized_x;
+
+    let normalized_y =
+      (this.origin.y + position.y + progress_y * this.canvas.height * 2) /
+      this.canvas.width;
+    if (normalized_y > 1) normalized_y = 2 - normalized_y;
+
+    if (this.pulseDirection == "N") r = r * normalized_y;
+    else if (this.pulseDirection == "NE") r = r * normalized_x * normalized_y;
+    else if (this.pulseDirection == "E") r = r * normalized_x;
+    else if (this.pulseDirection == "SE") r = r * normalized_x * normalized_y;
+    else if (this.pulseDirection == "S") r = r * normalized_y;
+    else if (this.pulseDirection == "SW") r = r * normalized_x * normalized_y;
+    else if (this.pulseDirection == "W") r = r * normalized_x;
+    else if (this.pulseDirection == "NW") r = r * normalized_x * normalized_y;
+
     this.context.beginPath();
     this.context.moveTo(
       this.origin.x + position.x + r / 2,
@@ -180,12 +281,17 @@ export class Tiling extends Animautomaton {
     );
     this.ctxDraw();
   };
-  drawTri = (position: Vector2, progress: number, orientation: boolean) => {
+
+  drawTri = (
+    position: Vector2,
+    progress: number,
+    orientation: "up" | "down"
+  ) => {
     const a = this.size;
     const h = (a * Math.sqrt(3)) / 5.5;
     const r = a / Math.sqrt(3);
     this.context.beginPath();
-    if (orientation) {
+    if (orientation == "up") {
       this.context.moveTo(
         this.origin.x + position.x,
         this.origin.y + position.y - r
@@ -223,6 +329,7 @@ export class Tiling extends Animautomaton {
     }
     this.ctxDraw();
   };
+
   drawSquare = (position: Vector2, progress: number) => {
     this.context.beginPath();
     this.context.moveTo(

@@ -113,6 +113,7 @@ export class Sempiternal extends Animautomaton {
     if (ops) this.setConfig(ops);
 
     this.postConstructor();
+    console.log(this);
   }
 
   // Capture the parent version of overridden methods
