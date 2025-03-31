@@ -1,7 +1,7 @@
 {
   "name": "animautomata",
-  "version": "1.0.5",
-  "description": "a library for creating high quality loading animations using the Canvas API",
+  "version": "1.0.6",
+  "description": "customizable high quality loading animations using the Canvas API",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {

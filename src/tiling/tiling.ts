@@ -72,6 +72,13 @@ export class Tiling extends Animautomaton {
     // Set initial configuration
     if (ops) this.setConfig(ops);
 
+    // Warn if trying to use unsupported shape
+    if (this.shape != "hex") {
+      throw new Error(
+        "Animautomata: Non-hex tilings are not yet fully implemented."
+      );
+    }
+
     this.postConstructor();
   }
 

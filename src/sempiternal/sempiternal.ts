@@ -113,7 +113,6 @@ export class Sempiternal extends Animautomaton {
     if (ops) this.setConfig(ops);
 
     this.postConstructor();
-    console.log(this);
   }
 
   /**

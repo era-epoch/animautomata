@@ -50,8 +50,6 @@ const commonProperties = [
   "ctxModifyOpacity",
   "drawDot",
   "circularBezierControlPoints",
-  "parentDraw",
-  "parentSetConfig",
 ];
 
 const fullAnimautomatonOps: Partial<AnimautomatonOps> = {
@@ -223,19 +221,5 @@ for (const PresetClass of [Antiquum, Sempiternal, Lemniscate]) {
     expect(instance.frame).toBe(99);
     instance.step();
     expect(instance.frame).toBe(0);
-  });
-
-  test("parentDraw is called within child draw method", () => {
-    initDocument();
-    const instance = new PresetClass("canvas");
-    const _parentDraw = instance.parentDraw;
-    const spy = jest.fn();
-    instance.parentDraw = () => {
-      spy();
-      _parentDraw();
-    };
-    expect(spy).toHaveBeenCalledTimes(0);
-    instance.step();
-    expect(spy).toHaveBeenCalled();
   });
 }
