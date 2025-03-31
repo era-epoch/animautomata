@@ -116,17 +116,13 @@ export class Sempiternal extends Animautomaton {
     console.log(this);
   }
 
-  // Capture the parent version of overridden methods
-  parentDraw = this.draw;
-  parentSetConfig = this.setConfig;
-
   /**
    * Sets one or more configurable properties of this Animautomaton.
    *
    * @param ops An object containing one or more valid {SempiternalOps} properties.
    */
-  setConfig = (ops: Partial<SempiternalOps>) => {
-    this.parentSetConfig(ops);
+  setConfig(ops: Partial<SempiternalOps>) {
+    super.setConfig(ops);
     this.sideLength = ops?.sideLength ?? this.sideLength;
     this.circleSize = ops?.circleSize ?? this.circleSize;
     this.relativeExpansion = ops?.relativeExpansion ?? this.relativeExpansion;
@@ -136,15 +132,14 @@ export class Sempiternal extends Animautomaton {
     this.rotations = ops?.rotations ?? this.rotations;
     this.opacityPulse = ops?.opacityPulse ?? this.opacityPulse;
     this.radiusPulse = ops?.radiusPulse ?? this.radiusPulse;
-  };
+  }
 
   /**
    * Uses this.context to draw the current frame of the animation, as determined by
    * this.currProgress. Called by this.animate.
    */
-  draw = () => {
-    // Eq. to super.draw()
-    this.parentDraw();
+  draw() {
+    super.draw();
 
     // Draw outer 'rings' first
     for (let i = this.sideLength - 1; i >= 0; i--) {
@@ -207,13 +202,13 @@ export class Sempiternal extends Animautomaton {
         }
       }
     }
-  };
+  }
 
   /**
    * Adjusts this.context's opacity based on the current opacityPulse settings.
    * @param level The ring of the shape.
    */
-  performOpacityPulse = (level: number) => {
+  performOpacityPulse(level: number) {
     const i = level;
     if (this.opacityPulse.style == "coelesce") {
       const pulseProg = this.getProgressLinear(this.opacityPulse.delay * i);
@@ -228,14 +223,14 @@ export class Sempiternal extends Animautomaton {
         pulseProg < 0.5 ? -(pulseProg * 2) : -2 + pulseProg * 2
       );
     }
-  };
+  }
 
   /**
    * Calculates the circle radius for a given level with the current radius pulse settings.
    * @param level
    * @returns The effective radius for this level given current progress.
    */
-  performRadiusPulse = (level: number): number => {
+  performRadiusPulse(level: number): number {
     const i = level;
     let effectiveRadius = this.circleSize;
     if (this.radiusPulse.style == "coelesce") {
@@ -256,5 +251,5 @@ export class Sempiternal extends Animautomaton {
         radiusModifier * this.radiusPulse.intensity * effectiveRadius;
     }
     return effectiveRadius;
-  };
+  }
 }

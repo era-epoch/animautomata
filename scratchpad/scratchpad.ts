@@ -1,11 +1,6 @@
 import { Tiling } from "../src";
 
 const setup = () => {
-  const tiling = new Tiling("canvas", {
-    timingFunction: "linear",
-    cycleDuration_ms: 5000,
-  });
-  tiling.play();
+  const tiling = new Tiling("canvas", {});
 };
 window.addEventListener("load", setup);
-window.addEventListener("reload", setup);

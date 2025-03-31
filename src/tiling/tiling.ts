@@ -73,12 +73,7 @@ export class Tiling extends Animautomaton {
     if (ops) this.setConfig(ops);
 
     this.postConstructor();
-    console.log(this);
   }
-
-  // Capture the parent version of overridden methods before override
-  parentDraw = this.draw;
-  parentSetConfig = this.setConfig;
 
   /**
    * Sets one or more configurable properties of this Animautomaton.
@@ -86,7 +81,7 @@ export class Tiling extends Animautomaton {
    * @param ops An object containing one or more valid {TilingOps} properties.
    */
   setConfig = (ops: Partial<TilingOps>) => {
-    this.parentSetConfig(ops);
+    super.setConfig(ops);
     this.lineWeight = ops.lineWeight ?? this.lineWeight;
     this.context.lineWidth = this.lineWeight;
     this.shape = ops.shape ?? this.shape;
@@ -102,36 +97,36 @@ export class Tiling extends Animautomaton {
    * Called by this.animate().
    */
   draw = () => {
-    this.parentDraw(); // eqv. to super.draw()
+    super.draw();
     const progress = this.getProgress();
     this.drawShapes(progress);
   };
 
-  drawShapes = (progress: number) => {
+  drawShapes(progress: number) {
     if (this.shape == "square") this.drawSquares(progress);
     else if (this.shape == "tri") this.drawTris(progress);
     else if (this.shape == "hex") this.drawHexes(progress);
     else throw new Error("Invalid Tiling shape: " + this.shape);
-  };
+  }
 
-  drawSquares = (progress: number) => {
+  drawSquares(progress: number) {
     const positions = this.getSquarePositions(progress);
     positions.forEach((position) => this.drawSquare(position, progress));
-  };
+  }
 
-  drawTris = (progress: number) => {
+  drawTris(progress: number) {
     const positions = this.getTriPositions(progress);
     positions.forEach((position) =>
       this.drawTri(position, progress, position.dir)
     );
-  };
+  }
 
-  drawHexes = (progress: number) => {
+  drawHexes(progress: number) {
     const positions = this.getHexPositions(progress);
     positions.forEach((position) => this.drawHex(position, progress));
-  };
+  }
 
-  getHexPositions = (progress: number) => {
+  getHexPositions(progress: number) {
     type HexPos = Vector2 & { col: number; row: number };
     const positions: HexPos[] = [];
     const shapeSize = this.size + this.padding;
@@ -159,9 +154,9 @@ export class Tiling extends Animautomaton {
       xOff += shapeSize * (3 / 4);
     }
     return positions;
-  };
+  }
 
-  getTriPositions = (progress: number) => {
+  getTriPositions(progress: number) {
     type TriPos = Vector2 & { dir: "up" | "down" };
     const positions: TriPos[] = [];
     const a = this.size;
@@ -189,9 +184,9 @@ export class Tiling extends Animautomaton {
       xOff += shapeSize / 2 + this.padding / 2;
     }
     return positions;
-  };
+  }
 
-  getSquarePositions = (progress: number) => {
+  getSquarePositions(progress: number) {
     const positions: Vector2[] = [];
     const shapeSize = this.size + this.padding;
     const cutoff = this.canvas.width / 2;
@@ -214,12 +209,9 @@ export class Tiling extends Animautomaton {
       xOff += shapeSize;
     }
     return positions;
-  };
+  }
 
-  drawHex = (
-    position: Vector2 & { col: number; row: number },
-    progress: number
-  ) => {
+  drawHex(position: Vector2 & { col: number; row: number }, progress: number) {
     let a = this.size;
     let r = a / 2;
     if (isEven(position.col)) position.y = position.y + r + this.padding / 2;
@@ -280,13 +272,9 @@ export class Tiling extends Animautomaton {
       this.origin.y + position.y - r
     );
     this.ctxDraw();
-  };
+  }
 
-  drawTri = (
-    position: Vector2,
-    progress: number,
-    orientation: "up" | "down"
-  ) => {
+  drawTri(position: Vector2, progress: number, orientation: "up" | "down") {
     const a = this.size;
     const h = (a * Math.sqrt(3)) / 5.5;
     const r = a / Math.sqrt(3);
@@ -328,9 +316,9 @@ export class Tiling extends Animautomaton {
       );
     }
     this.ctxDraw();
-  };
+  }
 
-  drawSquare = (position: Vector2, progress: number) => {
+  drawSquare(position: Vector2, progress: number) {
     this.context.beginPath();
     this.context.moveTo(
       this.origin.x + position.x + this.size / 2,
@@ -353,5 +341,5 @@ export class Tiling extends Animautomaton {
       this.origin.y + position.y - this.size / 2
     );
     this.ctxDraw();
-  };
+  }
 }
