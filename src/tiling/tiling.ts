@@ -67,7 +67,8 @@ export class Tiling extends Animautomaton {
     this.size = 70;
     this.padding = 0;
     this.drawStyle = "fill";
-    this.pulseDirection = "S";
+    this.pulseDirection = "N";
+    this.timingFunction = "linear";
 
     // Set initial configuration
     if (ops) this.setConfig(ops);
@@ -137,13 +138,14 @@ export class Tiling extends Animautomaton {
     type HexPos = Vector2 & { col: number; row: number };
     const positions: HexPos[] = [];
     const shapeSize = this.size + this.padding;
-    const cutoff = this.canvas.width / 2;
+    const xCutoff = this.canvas.width;
+    const yCutoff = this.canvas.height;
     let xOff = 0;
     let col = 0;
-    while (xOff <= cutoff) {
+    while (xOff <= xCutoff) {
       let yOff = 0;
       let row = 0;
-      while (yOff <= cutoff) {
+      while (yOff <= yCutoff) {
         positions.push({ x: xOff, y: yOff, col, row });
         if (xOff != 0) {
           positions.push({ x: -xOff, y: yOff, col: -col, row });
@@ -158,7 +160,7 @@ export class Tiling extends Animautomaton {
         yOff += shapeSize;
       }
       col++;
-      xOff += shapeSize * (3 / 4);
+      xOff += shapeSize * (3 / 4) - 1;
     }
     return positions;
   }
@@ -226,19 +228,26 @@ export class Tiling extends Animautomaton {
     const progress_x = ["E", "NE", "SE"].includes(this.pulseDirection)
       ? 1 - progress
       : progress;
-    const progress_y = ["S", "SW", "SE"].includes(this.pulseDirection)
+    let progress_y = ["S", "SW", "SE"].includes(this.pulseDirection)
       ? 1 - progress
       : progress;
 
     let normalized_x =
-      (this.origin.x + position.x + progress_x * this.canvas.width * 2) /
-      this.canvas.width;
+      (position.x + progress_x * this.canvas.width * 2) / this.canvas.width;
     if (normalized_x > 1) normalized_x = 2 - normalized_x;
 
     let normalized_y =
-      (this.origin.y + position.y + progress_y * this.canvas.height * 2) /
-      this.canvas.width;
+      (position.y + progress_y * this.canvas.height * 2) / this.canvas.height;
     if (normalized_y > 1) normalized_y = 2 - normalized_y;
+
+    const max_hold = 0;
+    if (normalized_y > 1 - max_hold) {
+      normalized_y = 1;
+    } else {
+      normalized_y = normalized_y * (1 / (1 - max_hold));
+    }
+
+    this.ctxSetColour(position.row);
 
     if (this.pulseDirection == "N") r = r * normalized_y;
     else if (this.pulseDirection == "NE") r = r * normalized_x * normalized_y;
