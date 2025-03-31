@@ -15,6 +15,14 @@ export const modulo = (n: number, m: number): number => {
   return ((n % m) + m) % m;
 };
 
+export const isEven = (n: number) => {
+  return modulo(n, 2) == 0;
+};
+
+export const isOdd = (n: number) => {
+  return modulo(n, 2) == 1;
+};
+
 /**
  * Uses Math.random() to mimic a v4 uuid. Not cryptographically secure.
  */

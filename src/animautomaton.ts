@@ -286,17 +286,17 @@ export abstract class Animautomaton {
   /**
    * This function must be called at the end of all child class constructors.
    */
-  postConstructor = () => {
+  postConstructor() {
     this.postConstructorCalls++;
-    if (!this.paused) requestAnimationFrame(this.animate);
-  };
+    if (!this.paused) requestAnimationFrame(() => this.animate());
+  }
 
   /**
    * Sets one or more configurable properties of this Animautomaton.
    *
    * @param ops An object containing one or more valid {AnimautomatonOps} properties.
    */
-  setConfig = (ops: Partial<AnimautomatonOps>) => {
+  setConfig(ops: Partial<AnimautomatonOps>) {
     this.backgroundColour = ops.backgroundColour ?? this.backgroundColour;
     this.currProgress = ops.currProgress ?? this.currProgress;
     this.lastProgress = ops.lastProgress ?? this.lastProgress;
@@ -321,12 +321,12 @@ export abstract class Animautomaton {
       x: Math.floor(this.canvas.width / 2),
       y: Math.floor(this.canvas.height / 2),
     };
-  };
+  }
 
   /**
    * Parent draw() must be called at the start of childrens' draw() methods.
    */
-  draw = () => {
+  draw() {
     // Clear previous render
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -343,38 +343,38 @@ export abstract class Animautomaton {
       this.context.fillStyle = this.backgroundColour;
       this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
-  };
+  }
 
   /**
    * Moves the animation 1 frame forward.
    */
-  step = () => {
+  step() {
     this.seek(1);
-  };
+  }
 
   /**
    * Moves the animation immediately a certain number of frames.
    * @param frames Number of frames to seek (negative = rewind, 0 = re-render current frame)
    */
-  seek = (frames: number) => {
+  seek(frames: number) {
     const msPerFrame = 1000 / this.fps;
     const progressPerFrame = msPerFrame / this.cycleDuration_ms;
     this.lastProgress = this.currProgress;
     this.currProgress = (1 + this.currProgress + frames * progressPerFrame) % 1;
     if (this.lastProgress === 1) this.currProgress = 0;
     this.draw();
-  };
+  }
 
   /**
    * This function is called every animation frame & decides whether or not to draw
    * a new frame of this animation, and also whether or not to call mutate().
    */
-  animate = () => {
+  animate() {
     // Cancel animation if paused
     if (this.paused) return;
 
     // Request the next animation frame
-    requestAnimationFrame(this.animate);
+    requestAnimationFrame(() => this.animate());
 
     // Check time delta since last call
     const now = performance.now();
@@ -396,14 +396,14 @@ export abstract class Animautomaton {
       }
     }
     this.draw();
-  };
+  }
 
   /**
    * @param offset An amount to either add or subtract from the base progress before transformation.
    * @returns A value between 0 and 1 representing the animation's progress through its loop,
    * transformed according to this.timingFunction.
    */
-  getProgress = (offset?: number): number => {
+  getProgress(offset?: number): number {
     switch (this.timingFunction) {
       case "sinusoidal":
         return this.getProgressSinusoidal(offset);
@@ -419,81 +419,81 @@ export abstract class Animautomaton {
       default:
         return this.getProgressLinear(offset);
     }
-  };
+  }
 
-  getProgressLinear = (offset?: number): number => {
+  getProgressLinear(offset?: number): number {
     const offset_progress = offset
       ? (this.currProgress + 1 + offset) % 1
       : this.currProgress;
     const x = Math.min(1, offset_progress / (1 - this.rest));
     return x;
-  };
+  }
 
-  getProgressExponential = (pow: number, offset?: number): number => {
+  getProgressExponential(pow: number, offset?: number): number {
     const offset_progress = offset
       ? (this.currProgress + 1 + offset) % 1
       : this.currProgress;
     const x = Math.min(1, offset_progress / (1 - this.rest));
     return Math.pow(x, pow);
-  };
+  }
 
-  getProgressSinusoidal = (offset?: number): number => {
+  getProgressSinusoidal(offset?: number): number {
     const offset_progress = offset
       ? (this.currProgress + 1 + offset) % 1
       : this.currProgress;
     const x = Math.min(1, offset_progress / (1 - this.rest));
     const t = 0.5 + Math.sin((x - 0.5) * Math.PI) / 2;
     return t;
-  };
+  }
 
   /**
    * Starts or resumes new rendering calls.
    */
-  play = () => {
+  play() {
     if (!this.paused) return;
     this.paused = false;
     const now = performance.now();
     this.lastDraw = now;
     this.pauseDuration += now - this.pauseTimestamp;
-    requestAnimationFrame(this.animate);
-  };
+    requestAnimationFrame(() => this.animate());
+  }
 
   /**
    * Prevents new rendering calls.
    */
-  pause = () => {
+  pause() {
     if (this.paused) return;
     this.paused = true;
     this.pauseTimestamp = performance.now();
-  };
+  }
 
   /**
    * Draws the current path in this.context based on this.drawStyle.
    */
-  ctxDraw = () => {
+  ctxDraw() {
     if (this.drawStyle == "fill") {
       this.context.fill();
     } else {
       this.context.stroke();
     }
-  };
+  }
 
   /**
    * Moves this.context to position vector v
    * @param v
    */
-  ctxMoveToVector = (v: Vector2) => {
+  ctxMoveToVector(v: Vector2) {
     this.context.moveTo(v.x, v.y);
-  };
+  }
 
   /**
    * Draws a line from the current position of this.context to the position given
    * by vector v.
    * @param v
    */
-  ctxLineToVector = (v: Vector2) => {
+  ctxLineToVector(v: Vector2) {
     this.context.lineTo(v.x, v.y);
-  };
+  }
 
   /**
    * Draws a circular bezier curve from the start position to the end position with the center
@@ -503,7 +503,7 @@ export abstract class Animautomaton {
    * @param end
    * @param originOffset
    */
-  ctxCircToVector = (start: Vector2, end: Vector2, originOffset: Vector2) => {
+  ctxCircToVector(start: Vector2, end: Vector2, originOffset: Vector2) {
     const cps = this.circularBezierControlPoints(start, end, originOffset);
     this.context.bezierCurveTo(
       cps.cp1.x,
@@ -513,13 +513,13 @@ export abstract class Animautomaton {
       end.x,
       end.y
     );
-  };
+  }
 
   /**
    * Sets both context.strokeStyle and context.fillStyle with appropriate opacity.
    * @param offset The index of the colour in this.colours (wraps around).
    */
-  ctxSetColour = (offset: number) => {
+  ctxSetColour(offset: number) {
     const modOffset = modulo(offset, this.colours.length);
     const opacity = Math.floor(
       Math.max(
@@ -534,13 +534,13 @@ export abstract class Animautomaton {
     // This is necessary because subseqent access to the colour on the context object does not
     // return opacity in some cases, for some unknown reason. TODO: Investigate
     this.currColour = colour;
-  };
+  }
 
   /**
    * Sets new opacity to: currentOpacity + currentOpacity * modifier. Enforces minimum of 0.
    * @param modifier
    */
-  ctxModifyOpacity = (modifier: number) => {
+  ctxModifyOpacity(modifier: number) {
     const styleString = this.currColour;
     const colour = styleString.slice(0, 7);
     const opacity = styleString.slice(7, 9);
@@ -551,12 +551,12 @@ export abstract class Animautomaton {
     this.context.strokeStyle = newColour;
     this.context.fillStyle = newColour;
     this.currColour = newColour;
-  };
+  }
 
   /**
    * Draws a radius 2 circle at the position given. Used for debugging.
    */
-  drawDot = (pos: Vector2) => {
+  drawDot(pos: Vector2) {
     this.context.beginPath();
     this.context.arc(
       this.origin.x + pos.x,
@@ -566,7 +566,7 @@ export abstract class Animautomaton {
       2 * Math.PI
     );
     this.context.fill();
-  };
+  }
 
   /**
    * Given two points {from} and {to}, calculates the control points necessary to draw a Bezier curve
@@ -576,11 +576,11 @@ export abstract class Animautomaton {
    * @param originOffset
    * @returns An object containing the Bezier control points.
    */
-  circularBezierControlPoints = (
+  circularBezierControlPoints(
     from: Vector2,
     to: Vector2,
     originOffset?: Vector2
-  ): BezierControlPoints => {
+  ): BezierControlPoints {
     // Thanks to: https://stackoverflow.com/questions/734076/how-to-best-approximate-a-geometrical-arc-with-a-bezier-curve
     const offset = originOffset ?? { x: 0, y: 0 };
     const ax = from.x - offset.x;
@@ -598,5 +598,5 @@ export abstract class Animautomaton {
       cp1: { x: x1, y: y1 },
       cp2: { x: x2, y: y2 },
     };
-  };
+  }
 }

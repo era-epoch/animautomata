@@ -203,17 +203,13 @@ export class Antiquum extends Animautomaton {
     this.postConstructor();
   }
 
-  // Capture the parent version of overridden methods
-  parentDraw = this.draw;
-  parentSetConfig = this.setConfig;
-
   /**
    * Sets one or more configurable properties of this Animautomaton.
    *
    * @param ops An object containing one or more valid {AntiquumOps} properties.
    */
-  setConfig = (ops: Partial<AntiquumOps>) => {
-    this.parentSetConfig(ops);
+  setConfig(ops: Partial<AntiquumOps>) {
+    super.setConfig(ops);
     this.arcs = ops.arcs ?? this.arcs;
     this.arcWidth = ops.arcWidth ?? this.arcWidth;
     this.arcWidthDelta = ops.arcWidthDelta ?? this.arcWidthDelta;
@@ -229,16 +225,16 @@ export class Antiquum extends Animautomaton {
     this.lineCap = ops.lineCap ?? this.lineCap;
     this.leadCap = ops.leadCap ?? this.leadCap;
     this.tailCap = ops.tailCap ?? this.tailCap;
-  };
+  }
 
   /**
    * @returns The number of rotations + partial rotations this animation has performed.
    */
-  getAccumulatedRotation = (): number => {
+  getAccumulatedRotation(): number {
     return (
       (this.currIteration + this.currProgress) * this.rotations * Math.PI * 2
     );
-  };
+  }
 
   /**
    * Uses this.context to draw the current frame of the animation, as determined by
@@ -246,9 +242,9 @@ export class Antiquum extends Animautomaton {
    *
    * Called by this.animate().
    */
-  draw = () => {
+  draw() {
     // Eq. to super.draw()
-    this.parentDraw();
+    super.draw();
 
     // Handle overall rotation
     const accumulatedRotation = this.getAccumulatedRotation();
@@ -353,7 +349,7 @@ export class Antiquum extends Animautomaton {
 
     // Draw the border circles
     this.drawBorders();
-  };
+  }
 
   /**
    * Draws an arc shape that is contained in a single 120deg section.
@@ -535,7 +531,7 @@ export class Antiquum extends Animautomaton {
   /**
    * Draws the background ring / track that the arcs travel over iff this.trackColour is not null.
    */
-  drawTrack = () => {
+  drawTrack() {
     if (!this.trackColour) return;
     this.context.beginPath();
     this.context.fillStyle = this.trackColour;
@@ -555,12 +551,12 @@ export class Antiquum extends Animautomaton {
       true
     );
     this.context.fill();
-  };
+  }
 
   /**
    * Draws the borders of the area the arcs travel along, iff borders are not null.
    */
-  drawBorders = () => {
+  drawBorders() {
     if (this.outerBorder) {
       this.context.beginPath();
       this.context.strokeStyle = this.outerBorder.colour;
@@ -588,12 +584,12 @@ export class Antiquum extends Animautomaton {
       );
       this.context.stroke();
     }
-  };
+  }
 
   /**
    * Calculates values used for future geometric calculations.
    */
-  calculateOffsets = (arc_i: number, arcWidthDiff: number): Offsets => {
+  calculateOffsets(arc_i: number, arcWidthDiff: number): Offsets {
     const radius =
       this.radius - (this.arcs - (arc_i + 1)) * this.radiusDelta * this.radius;
 
@@ -622,7 +618,7 @@ export class Antiquum extends Animautomaton {
       inner: innerOffset,
       mid: midOffset,
     };
-  };
+  }
 
   /**
    * Calculates geometric information used for drawing an arc shape.
