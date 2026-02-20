@@ -4,8 +4,6 @@
 
 An open-source, zero-dependency, fully-typed solution for creating high-quality, lightweight loading animations that fit your identity, using the Canvas API.
 
-## Features
-
 - minified library size is ~30kb uncompressed (~6kb gzipped)
 - use the abstract `Animautomata` parent class to create your own custom presets
 
