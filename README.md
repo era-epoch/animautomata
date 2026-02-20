@@ -6,13 +6,8 @@ An open-source, zero-dependency, fully-typed solution for creating high-quality,
 
 ## Features
 
-- Fully-typed (source written in Typescript).
-- Zero-dependency.
-- Add, transform, and remove loading animations with one line of javascript.
-- Simple, deeply configurable API.
-- Create and experiment using the [**Animautomata Forge web GUI**](https://animautomata.eracodes.net)
-- No image files => faster page loads. The minified library size is ~30kb uncompressed (~6kb gzipped). For comparison [the first google image result for "loading animation gif"](https://i.sstatic.net/kOnzy.gif) is over 80kb.
-- Use the abstract `Animautomata` parent class to create your own custom presets.
+- minified library size is ~30kb uncompressed (~6kb gzipped)
+- use the abstract `Animautomata` parent class to create your own custom presets
 
 ## Try it out online
 
