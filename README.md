@@ -2,7 +2,7 @@
 
 ## Summary
 
-An open-source, zero-dependency, fully-typed solution for creating high-quality, lightweight loading animations that fit your brand identity, using the Canvas API.
+An open-source, zero-dependency, fully-typed solution for creating high-quality, lightweight loading animations that fit your identity, using the Canvas API.
 
 ## Features
 
